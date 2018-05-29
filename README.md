@@ -101,7 +101,7 @@ This will start the frontend on localhost:3000 by default. Don't forget to use m
 ## Authors
 
 Alexandr Timchenko  
-Aziz Shaumarov  
+Asis Schaumarow 
 
 See also the list of [contributors](https://github.com/atimchenko92/elDapp/contributors) who participated in this project.
 
