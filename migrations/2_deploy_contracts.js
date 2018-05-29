@@ -7,5 +7,5 @@ module.exports = function(deployer) {
   deployer.deploy(HSKALib);
   deployer.link(QuestionsLib, Evaluation);
   deployer.link(HSKALib, Evaluation);
-  deployer.deploy(Evaluation);
+  deployer.deploy(Evaluation, "SoSe18", 14);
 };

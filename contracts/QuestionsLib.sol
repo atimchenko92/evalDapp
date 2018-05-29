@@ -13,7 +13,7 @@ library QuestionsLib {
 
   function getRatingTextForVal(QuestionArchetype _qarch, uint _val) public pure returns(string) {
     //Check val < Archetype's max val
-    if ( _val == 0 ){
+    if ( _val == 1 ){
       if (_qarch == QuestionArchetype.q1 || _qarch == QuestionArchetype.q2
               || _qarch == QuestionArchetype.q3 || _qarch == QuestionArchetype.q4
               || _qarch == QuestionArchetype.q5 || _qarch == QuestionArchetype.q6
@@ -24,7 +24,7 @@ library QuestionsLib {
         return "very good";
     }
 
-    if ( _val == 4){
+    if ( _val == 5){
       if (_qarch == QuestionArchetype.q1 || _qarch == QuestionArchetype.q2
               || _qarch == QuestionArchetype.q3 || _qarch == QuestionArchetype.q4
               || _qarch == QuestionArchetype.q5 || _qarch == QuestionArchetype.q6
@@ -35,7 +35,7 @@ library QuestionsLib {
         return "poor";
     }
 
-    if ( _val == 5 ) {
+    if ( _val == 6 ) {
       if (_qarch == QuestionArchetype.q1 || _qarch == QuestionArchetype.q2
               || _qarch == QuestionArchetype.q3 || _qarch == QuestionArchetype.q4
               || _qarch == QuestionArchetype.q5 || _qarch == QuestionArchetype.q6)
