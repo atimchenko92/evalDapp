@@ -25,5 +25,4 @@ library HSKALib {
       return "Distributed Networks 2";
     return "unknown";
   }
-//  getMaxValByScala
 }

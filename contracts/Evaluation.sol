@@ -36,12 +36,8 @@ contract Evaluation {
   struct EvaluatedCourse{
     uint courseId;
     bool isEvaluated;
-    mapping (uint => Answer) answersToQuestions; //Question id -> Answer
-  }
-
-  struct Answer{
-    uint qId;
-    string val;
+    mapping (uint => bytes32) answersToQuestions; //Question id -> value
+    //bytes32[] answersToQuestions;
   }
 
   constructor(string _semester, uint _durationInDays) public {
@@ -69,11 +65,6 @@ contract Evaluation {
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q5);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q7);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q9);
-
-    registerAccountForCourseEval(owner,1);
-    registerAccountForCourseEval(owner,2);
-
-    evaluateCourse(1);
   }
 
   function registerCourseForEvaluation(HSKALib.Courses _courseKey, HSKALib.Lecturers _lecturerKey) private returns (bool) {
@@ -90,11 +81,11 @@ contract Evaluation {
 
   function assignQuestionToCourse(uint _courseId, QuestionsLib.QuestionArchetype _qarch) private returns (bool) {
      Course storage _course = availableCourses[_courseId];
-    _course.numberOfQuestions++;
     _course.questionsToEvaluate[_course.numberOfQuestions] = Question ({
         id: _course.numberOfQuestions,
         body: QuestionsLib.getQuestionBody(_qarch)
     });
+    _course.numberOfQuestions++;
 
     return true;
   }
@@ -104,11 +95,15 @@ contract Evaluation {
   }
 
   //TODO
-  function evaluateCourse(uint _courseId) public returns(bool) {
-   require(!studentEvaluations[msg.sender][_courseId].isEvaluated);
+  function evaluateCourse(uint _courseId, bytes32[] _answers) public returns(bool) {
+    require(!studentEvaluations[msg.sender][_courseId].isEvaluated);
    //TODO: Check if all questions are answered:
    // 1. Check values <> 0
    // 2. N(answers) = N(course.numberOfQuestions)
+    for (uint i=0; i<_answers.length; i++) {
+      studentEvaluations[msg.sender][_courseId].answersToQuestions[i] = _answers[i];
+    }
+
     studentEvaluations[msg.sender][_courseId].isEvaluated = true;
     return true;
   }
@@ -123,9 +118,15 @@ contract Evaluation {
   function registerAccountForCourseEval(address _account, uint _courseId ) public {
     require(msg.sender == owner);
     require(!studentCourseRegistrations[_account][_courseId]);
+    //TODO: Check if course id valid
+    //TODO: give eth to cover up the gas expenses
     studentCourseRegistrations[_account][_courseId] = true;
-    //TODO: check if already registered
+
     //uint[] storage myCIDs = studentCourseRegistrations[_account];
     //myCIDs.push(_courseId);
+  }
+
+  function readEvaluation(address _account, uint _courseId, uint _qId) public view returns(bytes32){
+    return studentEvaluations[_account][_courseId].answersToQuestions[_qId];
   }
 }
