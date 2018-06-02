@@ -1,9 +1,10 @@
 pragma solidity ^0.4.23;
 
 library QuestionsLib {
-  enum QuestionArchetype {q1, q2, q3, q4, q5, q6, q7, q8, q9, q10}
+  enum QuestionArchetype {q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11}
 
   function getMaxValByRatingType(QuestionArchetype _qarch) public pure returns(uint) {
+    require(!isTextTypedInput(_qarch));
     if(_qarch == QuestionArchetype.q7 || _qarch == QuestionArchetype.q8
         || _qarch == QuestionArchetype.q9 || _qarch == QuestionArchetype.q10)
       return 4;
@@ -11,8 +12,15 @@ library QuestionsLib {
       return 5;
   }
 
+  function isTextTypedInput(QuestionArchetype _qarch) public pure returns(bool) {
+    if(_qarch == QuestionArchetype.q11)
+      return true;
+    return false;
+  }
+
   function getRatingTextForVal(QuestionArchetype _qarch, uint _val) public pure returns(string) {
     //Check val < Archetype's max val
+    require(!isTextTypedInput(_qarch));
     if ( _val == 1 ){
       if (_qarch == QuestionArchetype.q1 || _qarch == QuestionArchetype.q2
               || _qarch == QuestionArchetype.q3 || _qarch == QuestionArchetype.q4
@@ -66,8 +74,8 @@ library QuestionsLib {
       return "This internship/laboratory/project helped me to significantly improve my knowledge.";
     if (_qp == QuestionArchetype.q10)
       return "In total, I would rate this internship/laboratory/project as ...";
+    if (_qp == QuestionArchetype.q11)
+      return "I would sugest ...";
     return "dummy";
   }
-
-
 }

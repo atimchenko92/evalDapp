@@ -2,10 +2,11 @@ pragma solidity ^0.4.23;
 
 import { QuestionsLib } from "./QuestionsLib.sol";
 import { HSKALib } from "./HSKALib.sol";
+import { Utils } from "./Utils.sol";
 
 contract Evaluation {
   mapping (address => mapping (uint => EvaluatedCourse)) public studentEvaluations;
-  mapping (address => mapping (uint => bool)) public studentCourseRegistrations; //Adress->courseId
+  mapping (address => mapping (uint => bool)) public studentCourseRegistrations;
   mapping (uint => Course) public availableCourses;
 
   address public owner;
@@ -13,6 +14,8 @@ contract Evaluation {
   uint public evalStart;
   uint public evalEnd;
   string public semester;
+  uint public amountEvaluated;
+  uint public amountRegistered;
 
   struct Lecturer{
     uint id;
@@ -37,7 +40,11 @@ contract Evaluation {
     uint courseId;
     bool isEvaluated;
     mapping (uint => bytes32) answersToQuestions; //Question id -> value
-    //bytes32[] answersToQuestions;
+  }
+
+  modifier onlyAdmin(){
+    require(msg.sender == owner, "Not an owner");
+    _;
   }
 
   constructor(string _semester, uint _durationInDays) public {
@@ -65,6 +72,8 @@ contract Evaluation {
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q5);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q7);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q9);
+
+
   }
 
   function registerCourseForEvaluation(HSKALib.Courses _courseKey, HSKALib.Lecturers _lecturerKey) private returns (bool) {
@@ -94,39 +103,40 @@ contract Evaluation {
     return availableCourses[_cId].questionsToEvaluate[_qId].body;
   }
 
-  //TODO
+  //TODO: M0ar checks
   function evaluateCourse(uint _courseId, bytes32[] _answers) public returns(bool) {
-    require(!studentEvaluations[msg.sender][_courseId].isEvaluated);
+    require(studentCourseRegistrations[msg.sender][_courseId], "Not registered for this course");
+    require(!studentEvaluations[msg.sender][_courseId].isEvaluated, "This course is already evaluated");
+    require(_answers.length == availableCourses[_courseId].numberOfQuestions,
+      "The evaluation for this course is not complete");
    //TODO: Check if all questions are answered:
    // 1. Check values <> 0
-   // 2. N(answers) = N(course.numberOfQuestions)
     for (uint i=0; i<_answers.length; i++) {
+//      if ()
+//        require(_answers[i]!="0", "Not all questions were answered");
+
       studentEvaluations[msg.sender][_courseId].answersToQuestions[i] = _answers[i];
+      //TODO:only for uint-type of questions
     }
 
     studentEvaluations[msg.sender][_courseId].isEvaluated = true;
+    amountEvaluated++;
     return true;
   }
 
-//  function answerToQuestion(uint _courseId, uint _qId, string _value) public {
-    //TODO: check if registered for course
-//    EvaluatedCourse storage myCourses = evaluations[msg.sender];
-//    require(!myCourses[_courseId].isEvaluated);
-//    myCourses[_courseId].answersToQuestions[_qId] = _value;
-//  }
-
-  function registerAccountForCourseEval(address _account, uint _courseId ) public {
-    require(msg.sender == owner);
-    require(!studentCourseRegistrations[_account][_courseId]);
-    //TODO: Check if course id valid
+  function registerAccountForCourseEval(address _account, uint _courseId ) public onlyAdmin {
+    require(!studentCourseRegistrations[_account][_courseId], "Student is already registered");
+    require(availableCourses[_courseId].id != 0, "The course is not registered");
     //TODO: give eth to cover up the gas expenses
     studentCourseRegistrations[_account][_courseId] = true;
-
-    //uint[] storage myCIDs = studentCourseRegistrations[_account];
-    //myCIDs.push(_courseId);
+    amountRegistered++;
   }
 
-  function readEvaluation(address _account, uint _courseId, uint _qId) public view returns(bytes32){
-    return studentEvaluations[_account][_courseId].answersToQuestions[_qId];
+  function readEvaluation(address _account, uint _courseId, uint _qId) public view returns(string){
+    return Utils.bytes32ToString(studentEvaluations[_account][_courseId].answersToQuestions[_qId]);
+  }
+
+  function checkRegistration(address _adr, uint _courseId) public onlyAdmin view returns (bool){
+    return studentCourseRegistrations[_adr][_courseId];
   }
 }
