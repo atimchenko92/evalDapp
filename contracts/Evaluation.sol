@@ -11,11 +11,13 @@ contract Evaluation {
 
   address public owner;
   uint public coursesCount;
-  uint public evalStart;
-  uint public evalEnd;
+  uint public evalInitTimestamp;
+  uint public evalStartTimestamp;
+  uint public evalEndTimestamp;
   string public semester;
   uint public amountEvaluated;
   uint public amountRegistered;
+  uint private testNow; //Test only
 
   struct Lecturer{
     uint id;
@@ -47,11 +49,23 @@ contract Evaluation {
     _;
   }
 
-  constructor(string _semester, uint _durationInDays) public {
+  modifier inRegistrationInterval(){
+    require(testNow < evalStartTimestamp && testNow >= evalInitTimestamp, "Registration time interval is expired");
+    _;
+  }
+
+  modifier inEvaluationInterval(){
+    require(testNow <= evalEndTimestamp && testNow >= evalStartTimestamp, "Not in evaluation time interval");
+    _;
+  }
+
+  constructor(string _semester, uint startOffsetInDays, uint _durationInDays) public {
     owner = msg.sender;
     semester = _semester;
-    evalStart = now;
-    evalEnd = evalStart + (_durationInDays * 1 days);
+    evalInitTimestamp = now;
+    testNow = now;
+    evalStartTimestamp = now + startOffsetInDays * 1 days;
+    evalEndTimestamp = evalStartTimestamp + (_durationInDays * 1 days);
 
     //Register courses and assign questions
     registerCourseForEvaluation(HSKALib.Courses.course1, HSKALib.Lecturers.prof1);
@@ -76,7 +90,7 @@ contract Evaluation {
 
   }
 
-  function registerCourseForEvaluation(HSKALib.Courses _courseKey, HSKALib.Lecturers _lecturerKey) private returns (bool) {
+  function registerCourseForEvaluation(HSKALib.Courses _courseKey, HSKALib.Lecturers _lecturerKey) private inRegistrationInterval returns (bool) {
     coursesCount++;
     availableCourses[coursesCount] = Course ({
        id: coursesCount,
@@ -88,7 +102,7 @@ contract Evaluation {
     return true;
   }
 
-  function assignQuestionToCourse(uint _courseId, QuestionsLib.QuestionArchetype _qarch) private returns (bool) {
+  function assignQuestionToCourse(uint _courseId, QuestionsLib.QuestionArchetype _qarch) private inRegistrationInterval returns (bool) {
      Course storage _course = availableCourses[_courseId];
     _course.questionsToEvaluate[_course.numberOfQuestions] = Question ({
         id: _course.numberOfQuestions,
@@ -99,12 +113,12 @@ contract Evaluation {
     return true;
   }
 
-  function getQuestionBodyByCourse(uint _cId, uint _qId) public constant returns (string) {
+  function getQuestionBodyByCourse(uint _cId, uint _qId) public view returns (string) {
     return availableCourses[_cId].questionsToEvaluate[_qId].body;
   }
 
   //TODO: M0ar checks
-  function evaluateCourse(uint _courseId, bytes32[] _answers) public returns(bool) {
+  function evaluateCourse(uint _courseId, bytes32[] _answers) public inEvaluationInterval returns(bool) {
     require(studentCourseRegistrations[msg.sender][_courseId], "Not registered for this course");
     require(!studentEvaluations[msg.sender][_courseId].isEvaluated, "This course is already evaluated");
     require(_answers.length == availableCourses[_courseId].numberOfQuestions,
@@ -124,7 +138,7 @@ contract Evaluation {
     return true;
   }
 
-  function registerAccountForCourseEval(address _account, uint _courseId ) public onlyAdmin {
+  function registerAccountForCourseEval(address _account, uint _courseId ) public inRegistrationInterval onlyAdmin {
     require(!studentCourseRegistrations[_account][_courseId], "Student is already registered");
     require(availableCourses[_courseId].id != 0, "The course is not registered");
     //TODO: give eth to cover up the gas expenses
@@ -139,4 +153,13 @@ contract Evaluation {
   function checkRegistration(address _adr, uint _courseId) public onlyAdmin view returns (bool){
     return studentCourseRegistrations[_adr][_courseId];
   }
+
+  function increaseNowTime(uint timeInDays) public {
+    testNow += timeInDays * 1 days;
+  }
+
+  function decreaseNowTime(uint timeInDays) public {
+    testNow -= timeInDays * 1 days;
+  }
+
 }
