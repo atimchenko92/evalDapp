@@ -19,29 +19,19 @@ contract Evaluation {
   uint public amountRegistered;
   uint private testNow; //Test only
 
-  struct Lecturer{
-    uint id;
-    string fullname;
-  }
-
   struct Course {
     uint id;
-    string title;
-    uint numberOfLecturers;
+    HSKALib.Courses courseKey;
+    HSKALib.Lecturers lecturerKey;
     uint numberOfQuestions;
-    string courseLecturer;
-    mapping (uint => Question) questionsToEvaluate;
-  }
-
-  struct Question{
-    uint id;
-    string body;
+    mapping (uint => QuestionsLib.QuestionArchetype) questionsToEvaluate;
   }
 
   struct EvaluatedCourse{
     uint courseId;
     bool isEvaluated;
-    mapping (uint => bytes32) answersToQuestions; //Question id -> value
+    mapping (uint => uint) answersToUIntQuestions;
+    mapping (uint => bytes32) answersToTxtQuestions; //Question id -> value
   }
 
   modifier onlyAdmin(){
@@ -72,6 +62,7 @@ contract Evaluation {
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q1);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q2);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q3);
+    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q11);
 
     registerCourseForEvaluation(HSKALib.Courses.course2, HSKALib.Lecturers.prof1);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q3);
@@ -79,7 +70,8 @@ contract Evaluation {
 
     registerCourseForEvaluation(HSKALib.Courses.course3, HSKALib.Lecturers.prof2);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q4);
-    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q5);
+    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q8);
+    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q11);
 
     registerCourseForEvaluation(HSKALib.Courses.course4, HSKALib.Lecturers.prof3);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q4);
@@ -87,50 +79,51 @@ contract Evaluation {
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q7);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q9);
 
-
   }
 
   function registerCourseForEvaluation(HSKALib.Courses _courseKey, HSKALib.Lecturers _lecturerKey) private inRegistrationInterval returns (bool) {
     coursesCount++;
     availableCourses[coursesCount] = Course ({
        id: coursesCount,
-       title: HSKALib.getCourseName(_courseKey),
-       numberOfLecturers: 0,
-       numberOfQuestions: 0,
-       courseLecturer: HSKALib.getLecturerName(_lecturerKey)
+       courseKey: _courseKey,
+       lecturerKey: _lecturerKey,
+       numberOfQuestions: 0
      });
     return true;
   }
 
   function assignQuestionToCourse(uint _courseId, QuestionsLib.QuestionArchetype _qarch) private inRegistrationInterval returns (bool) {
      Course storage _course = availableCourses[_courseId];
-    _course.questionsToEvaluate[_course.numberOfQuestions] = Question ({
-        id: _course.numberOfQuestions,
-        body: QuestionsLib.getQuestionBody(_qarch)
-    });
+    _course.questionsToEvaluate[_course.numberOfQuestions] = _qarch;
     _course.numberOfQuestions++;
 
     return true;
   }
 
-  function getQuestionBodyByCourse(uint _cId, uint _qId) public view returns (string) {
-    return availableCourses[_cId].questionsToEvaluate[_qId].body;
-  }
-
-  //TODO: M0ar checks
-  function evaluateCourse(uint _courseId, bytes32[] _answers) public inEvaluationInterval returns(bool) {
-    require(studentCourseRegistrations[msg.sender][_courseId], "Not registered for this course");
-    require(!studentEvaluations[msg.sender][_courseId].isEvaluated, "This course is already evaluated");
-    require(_answers.length == availableCourses[_courseId].numberOfQuestions,
+  // _uintAns: all answers for non-txt questions
+  // _txtAns: all answers for txt-questions
+  function evaluateCourse(uint _courseId, uint[] _uintAns, bytes32[] _txtAns)
+   public inEvaluationInterval returns(bool) {
+    require(studentCourseRegistrations[msg.sender][_courseId],
+      "Not registered for this course");
+    require(!studentEvaluations[msg.sender][_courseId].isEvaluated,
+      "This course is already evaluated");
+    require((_uintAns.length + _txtAns.length) == availableCourses[_courseId].numberOfQuestions,
       "The evaluation for this course is not complete");
-   //TODO: Check if all questions are answered:
-   // 1. Check values <> 0
-    for (uint i=0; i<_answers.length; i++) {
-//      if ()
-//        require(_answers[i]!="0", "Not all questions were answered");
-
-      studentEvaluations[msg.sender][_courseId].answersToQuestions[i] = _answers[i];
-      //TODO:only for uint-type of questions
+    uint currentUintCnt = 0;
+    uint currentTxtCnt = 0;
+    for(uint i = 0; i < availableCourses[_courseId].numberOfQuestions; i++){
+      if (!QuestionsLib.isTextTypedInput(availableCourses[_courseId].questionsToEvaluate[i])){
+        require(_uintAns[currentUintCnt] > 0
+          && _uintAns[currentUintCnt] <= QuestionsLib.getMaxVal(availableCourses[_courseId].questionsToEvaluate[i]),
+        "Incorrect answer" );
+        studentEvaluations[msg.sender][_courseId].answersToUIntQuestions[i] = _uintAns[currentUintCnt];
+        currentUintCnt++;
+      }
+      else{
+        studentEvaluations[msg.sender][_courseId].answersToTxtQuestions[i] = _txtAns[currentTxtCnt];
+        currentTxtCnt++;
+      }
     }
 
     studentEvaluations[msg.sender][_courseId].isEvaluated = true;
@@ -146,8 +139,26 @@ contract Evaluation {
     amountRegistered++;
   }
 
+  function getCourseTitle(uint _cId) public view returns (string) {
+    return HSKALib.getCourseName(availableCourses[_cId].courseKey);
+  }
+
+  function getCourseLecturerName(uint _cId) public view returns (string) {
+    return HSKALib.getLecturerName(availableCourses[_cId].lecturerKey);
+  }
+
+  function getQuestionBodyByCourse(uint _cId, uint _qId) public view returns (string) {
+    return QuestionsLib.getQuestionBody(availableCourses[_cId].questionsToEvaluate[_qId]);
+  }
+
   function readEvaluation(address _account, uint _courseId, uint _qId) public view returns(string){
-    return Utils.bytes32ToString(studentEvaluations[_account][_courseId].answersToQuestions[_qId]);
+    if(QuestionsLib.isTextTypedInput(availableCourses[_courseId].questionsToEvaluate[_qId]))
+      return Utils.bytes32ToString(studentEvaluations[_account][_courseId].answersToTxtQuestions[_qId]);
+    return Utils.uintToString(studentEvaluations[_account][_courseId].answersToUIntQuestions[_qId]);
+  }
+
+  function isCourseEvaluatedByAccount(address _account, uint _courseId) public view returns(bool){
+    return studentEvaluations[_account][_courseId].isEvaluated;
   }
 
   function checkRegistration(address _adr, uint _courseId) public onlyAdmin view returns (bool){
