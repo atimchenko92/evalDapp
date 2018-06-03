@@ -131,10 +131,10 @@ contract Evaluation {
     return true;
   }
 
-  function registerAccountForCourseEval(address _account, uint _courseId ) public inRegistrationInterval onlyAdmin {
+  function registerAccountForCourseEval(address _account, uint _courseId) payable public inRegistrationInterval onlyAdmin {
     require(!studentCourseRegistrations[_account][_courseId], "Student is already registered");
     require(availableCourses[_courseId].id != 0, "The course is not registered");
-    //TODO: give eth to cover up the gas expenses
+    _account.transfer(msg.value);
     studentCourseRegistrations[_account][_courseId] = true;
     amountRegistered++;
   }
@@ -171,6 +171,16 @@ contract Evaluation {
 
   function decreaseNowTime(uint timeInDays) public {
     testNow -= timeInDays * 1 days;
+  }
+
+  function destroy() public onlyAdmin{
+   selfdestruct(owner); // send funds to organizers
+  }
+
+  function contributeToContract() public payable {}
+
+  function getContractBalance() public view returns (uint){
+   return address(this).balance;
   }
 
 }
