@@ -31,7 +31,7 @@ contract Evaluation {
     uint courseId;
     bool isEvaluated;
     mapping (uint => uint) answersToUIntQuestions;
-    mapping (uint => bytes32) answersToTxtQuestions; //Question id -> value
+    mapping (uint => bytes32) answersToTxtQuestions; //Question id -> answer value
   }
 
   modifier onlyAdmin(){
@@ -89,6 +89,7 @@ contract Evaluation {
        lecturerKey: _lecturerKey,
        numberOfQuestions: 0
      });
+
     return true;
   }
 
@@ -100,14 +101,16 @@ contract Evaluation {
     return true;
   }
 
-  // _uintAns: all answers for non-txt questions
-  // _txtAns: all answers for txt-questions
+  // _uintAns: all answers for non-txt questions(for frontend: should be ordered)
+  // _txtAns: all answers for txt-questions (for frontend: should be ordered)
+  //TODO: String[] or bytes32[][] are needed possibly
   function evaluateCourse(uint _courseId, uint[] _uintAns, bytes32[] _txtAns)
    public inEvaluationInterval returns(bool) {
     require(studentCourseRegistrations[msg.sender][_courseId],
       "Not registered for this course");
     require(!studentEvaluations[msg.sender][_courseId].isEvaluated,
       "This course is already evaluated");
+    // REDO: check on uint questions and txt questions
     require((_uintAns.length + _txtAns.length) == availableCourses[_courseId].numberOfQuestions,
       "The evaluation for this course is not complete");
     uint currentUintCnt = 0;

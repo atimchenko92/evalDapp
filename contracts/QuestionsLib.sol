@@ -7,9 +7,9 @@ library QuestionsLib {
     require(!isTextTypedInput(_qarch));
     if(_qarch == QuestionArchetype.q7 || _qarch == QuestionArchetype.q8
         || _qarch == QuestionArchetype.q9 || _qarch == QuestionArchetype.q10)
-      return 4;
-    else
       return 5;
+    else
+      return 6;
   }
 
   function isTextTypedInput(QuestionArchetype _qarch) public pure returns(bool) {
