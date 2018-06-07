@@ -10,8 +10,8 @@ contract('Evaluation', function(accounts) {
   var answersUintTest1 = [1, 4, 4];
   var answersUintTest2 = [1, 2];
   var ansersTxtTestEmpty = [];
-  var answersTxtTest1 = [web3.fromAscii("Abra")];
-  var ethAmount = 3375000000000000;
+  var answersTxtTest1 = ["ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ2"];
+  var ethAmount = 3500000000000000;
   var smallEthAmount = 1
   let eval;
   let accNoFunds = web3.personal.newAccount('test123');
@@ -83,7 +83,7 @@ contract('Evaluation', function(accounts) {
      assert.equal(answersUintTest1[i], savedAns, "The results of evaluation are not saved correctly");
    }
    savedAns = await eval.readEvaluation(accounts[1], courseId, 3, {from: owner});
-   assert.equal(web3.toAscii(answersTxtTest1[0]), savedAns, "The results of evaluation are not saved correctly");
+   assert.equal(answersTxtTest1[0], savedAns, "The results of evaluation are not saved correctly");
   });
 
   it("Evaluation before the evaluation period is not possible", async () => {
@@ -187,7 +187,7 @@ contract('Evaluation', function(accounts) {
     await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
     await eval.increaseNowTime(registration);
     await eval.evaluateCourse(3, answersUint,
-    answersTxt, {from: accounts[1]});
+    answersTxtTest1, {from: accounts[1]});
     let savedAns;
     for (i = 0; i < 3; i++){
      savedAns = await eval.readEvaluation(accounts[1], 3, i, {from: owner});

@@ -103,7 +103,7 @@ contract Evaluation {
 
   // _uintAns: all answers for non-txt questions(for frontend: should be ordered)
   // _txtAns: all answers for txt-questions (for frontend: should be ordered)
-  //TODO: String[] or bytes32[][] are needed possibly
+  //Limitation of txt answers : 32 Characters
   function evaluateCourse(uint _courseId, uint[] _uintAns, bytes32[] _txtAns)
    public inEvaluationInterval returns(bool) {
     require(studentCourseRegistrations[msg.sender][_courseId],
