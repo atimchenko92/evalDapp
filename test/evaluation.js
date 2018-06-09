@@ -9,9 +9,21 @@ contract('Evaluation', function(accounts) {
   var courseId = 1;
   var answersUintTest1 = [1, 4, 4];
   var answersUintTest2 = [1, 2];
-  var ansersTxtTestEmpty = [];
-  var answersTxtTest1 = ["ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ2"];
-  var ethAmount = 3500000000000000;
+  var ansersTxtTestEmpty = "";
+
+//Txt answers test data
+  var delim = "//";
+  var answersTxtTest1p1 = "Test./ AHAHAHA sasawrasdxzzf3223r23r";
+  var answersTxtTest1p2 = "afaSASDmmm   asfsadad";
+  var answersTxtTest1p3 = "Da landa";
+  var answersTxtTest1p4 = "Раз два три";
+
+  var answersTxtTest1 = answersTxtTest1p1;
+  var answersTxtTest2 = answersTxtTest1p1.concat(delim, answersTxtTest1p2,
+     delim, answersTxtTest1p3, delim, answersTxtTest1p4);
+//////////////////////////
+
+  var ethAmount = 4700000000000000;
   var smallEthAmount = 1
   let eval;
   let accNoFunds = web3.personal.newAccount('test123');
@@ -72,18 +84,41 @@ contract('Evaluation', function(accounts) {
     assert.equal(res, true, "This course should be evaluated");
   });
 
-  it("Results of evaluation are saved correctly", async () => {
-   await eval.registerAccountForCourseEval(accounts[1], courseId, {from: owner, value: smallEthAmount});
+  it("Results of evaluation are saved correctly. Test#1", async () => {
+   var txt = "Assah  iia / asdasds";
+   await eval.registerAccountForCourseEval(accounts[1], 1, {from: owner, value: smallEthAmount});
    await eval.increaseNowTime(registration);
-   await eval.evaluateCourse(courseId, answersUintTest1,
-    answersTxtTest1, {from: accounts[1]});
+   await eval.evaluateCourse(1, answersUintTest1, txt, {from: accounts[1]});
    let savedAns;
    for (i = 0; i < answersUintTest1.length; i++){
-     savedAns = await eval.readEvaluation(accounts[1], courseId, i, {from: owner});
-     assert.equal(answersUintTest1[i], savedAns, "The results of evaluation are not saved correctly");
+     savedAns = await eval.readEvaluation(accounts[1], 1, i, {from: owner});
+     assert.equal(answersUintTest1[i], savedAns, "The results of uint evaluation are not saved correctly");
    }
-   savedAns = await eval.readEvaluation(accounts[1], courseId, 3, {from: owner});
-   assert.equal(answersTxtTest1[0], savedAns, "The results of evaluation are not saved correctly");
+   savedAns = await eval.readEvaluation(accounts[1], 1, 3, {from: owner});
+   assert.equal(savedAns, "Assah  iia / asdasds", "The results of txt evaluation are not saved correctly");
+  });
+
+  it("Results of evaluation are saved correctly. Test#2", async () => {
+   var txt = "adas//33/44//22ASdadsad/AAdAd/A dasdASd//adas//55";
+   await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
+   await eval.increaseNowTime(registration);
+   await eval.evaluateCourse(3, answersUintTest2, txt, {from: accounts[1]});
+   let savedAns;
+   for (i = 0; i < answersUintTest2.length; i++){
+     savedAns = await eval.readEvaluation(accounts[1], 3, i, {from: owner});
+     assert.equal(answersUintTest2[i], savedAns, "The results of uint evaluation are not saved correctly");
+   }
+   savedAns = await eval.readEvaluation(accounts[1], 3, 2, {from: owner});
+   assert.equal(savedAns, "adas", "The results of txt evaluation are not saved correctly");
+
+   savedAns = await eval.readEvaluation(accounts[1], 3, 3, {from: owner});
+   assert.equal(savedAns, "33/44", "The results of txt evaluation are not saved correctly");
+
+   savedAns = await eval.readEvaluation(accounts[1], 3, 4, {from: owner});
+   assert.equal(savedAns, "22ASdadsad/AAdAd/A dasdASd", "The results of txt evaluation are not saved correctly");
+
+   savedAns = await eval.readEvaluation(accounts[1], 3, 5, {from: owner});
+   assert.equal(savedAns, "adas", "The results of txt evaluation are not saved correctly");
   });
 
   it("Evaluation before the evaluation period is not possible", async () => {
@@ -144,9 +179,12 @@ contract('Evaluation', function(accounts) {
   it("The person can evaluate multiple courses", async () => {
     await eval.registerAccountForCourseEval(accounts[1], 1, {from: owner, value: smallEthAmount});
     await eval.registerAccountForCourseEval(accounts[1], 2, {from: owner, value: smallEthAmount});
+    await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
     await eval.increaseNowTime(registration);
     await eval.evaluateCourse(1, answersUintTest1, answersTxtTest1, {from: accounts[1]});
     await eval.evaluateCourse(2, answersUintTest2, ansersTxtTestEmpty, {from: accounts[1]});
+    await eval.evaluateCourse(3, [3,3], answersTxtTest2, {from: accounts[1]});
+
   });
 
   it("Incorrect number of answers pro evaluation is not possible", async () => {
@@ -183,11 +221,9 @@ contract('Evaluation', function(accounts) {
 
   it("UInt-Questions can be answered with max values", async () => {
     var answersUint = [6, 5];
-    var answersTxt = ["the exams would not be so hard to accomplish, lol"];
     await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
     await eval.increaseNowTime(registration);
-    await eval.evaluateCourse(3, answersUint,
-    answersTxtTest1, {from: accounts[1]});
+    await eval.evaluateCourse(3, answersUint, answersTxtTest2, {from: accounts[1]});
     let savedAns;
     for (i = 0; i < 3; i++){
      savedAns = await eval.readEvaluation(accounts[1], 3, i, {from: owner});
@@ -197,11 +233,10 @@ contract('Evaluation', function(accounts) {
 
   it("UInt-Questions cannot be answered with 0 value", async () => {
     var answersUint = [0, 5];
-    var answersTxt = ["the exams would not be so hard to accomplish, lol"];
     await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
     await eval.increaseNowTime(registration);
     try{
-      await eval.evaluateCourse(3, answersUint, answersTxt, {from: accounts[1]});
+      await eval.evaluateCourse(3, answersUint, answersTxtTest2, {from: accounts[1]});
     }
     catch(e){
       const revertErr = e.message.search('revert') >= 0;
@@ -215,11 +250,10 @@ contract('Evaluation', function(accounts) {
 
   it("UInt-Questions cannot be answered with value more than max", async () => {
     var answersUint = [6, 6];
-    var answersTxt = ["the exams would not be so hard to accomplish, lol"];
     await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
     await eval.increaseNowTime(registration);
     try{
-      await eval.evaluateCourse(3, answersUint, answersTxt, {from: accounts[1]});
+      await eval.evaluateCourse(3, answersUint, answersTxtTest2, {from: accounts[1]});
     }
     catch(e){
       const revertErr = e.message.search('revert') >= 0;
@@ -230,6 +264,20 @@ contract('Evaluation', function(accounts) {
     }
     assert.fail('Expected throw not received');
   });
+/*
+  it("Testmap2 test", async () => {
+    await eval.test2(3, "Русня бля//aASdsadASDASDASDASd//ooo/z//z",
+      {from: accounts[1]});
+
+    let ans = await eval.readTest2(accounts[1], 3, 0);
+    console.log(ans);
+    ans = await eval.readTest2(accounts[1], 3, 1);
+    console.log(ans);
+    ans = await eval.readTest2(accounts[1], 3, 2);
+    console.log(ans);
+
+  });
+  */
 
   //Do more tests...
   //??
