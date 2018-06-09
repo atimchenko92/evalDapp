@@ -23,7 +23,7 @@ contract('Evaluation', function(accounts) {
      delim, answersTxtTest1p3, delim, answersTxtTest1p4);
 //////////////////////////
 
-  var ethAmount = 4700000000000000;
+  var ethAmount = 5000000000000000;
   var smallEthAmount = 1
   let eval;
   let accNoFunds = web3.personal.newAccount('test123');
@@ -95,7 +95,7 @@ contract('Evaluation', function(accounts) {
      assert.equal(answersUintTest1[i], savedAns, "The results of uint evaluation are not saved correctly");
    }
    savedAns = await eval.readEvaluation(accounts[1], 1, 3, {from: owner});
-   assert.equal(savedAns, "Assah  iia / asdasds", "The results of txt evaluation are not saved correctly");
+   assert.equal(savedAns, txt, "The results of txt evaluation are not saved correctly");
   });
 
   it("Results of evaluation are saved correctly. Test#2", async () => {
@@ -184,7 +184,6 @@ contract('Evaluation', function(accounts) {
     await eval.evaluateCourse(1, answersUintTest1, answersTxtTest1, {from: accounts[1]});
     await eval.evaluateCourse(2, answersUintTest2, ansersTxtTestEmpty, {from: accounts[1]});
     await eval.evaluateCourse(3, [3,3], answersTxtTest2, {from: accounts[1]});
-
   });
 
   it("Incorrect number of answers pro evaluation is not possible", async () => {
@@ -264,24 +263,11 @@ contract('Evaluation', function(accounts) {
     }
     assert.fail('Expected throw not received');
   });
-/*
-  it("Testmap2 test", async () => {
-    await eval.test2(3, "Русня бля//aASdsadASDASDASDASd//ooo/z//z",
-      {from: accounts[1]});
-
-    let ans = await eval.readTest2(accounts[1], 3, 0);
-    console.log(ans);
-    ans = await eval.readTest2(accounts[1], 3, 1);
-    console.log(ans);
-    ans = await eval.readTest2(accounts[1], 3, 2);
-    console.log(ans);
-
-  });
-  */
 
   //Do more tests...
   //??
   //Profit
-  //Start with Frontend
+
+  //Start with Frontend <-
 
 });

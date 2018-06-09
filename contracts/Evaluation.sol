@@ -6,7 +6,8 @@ import { Utils } from "./Utils.sol";
 import { strings } from "./strings.sol";
 
 contract Evaluation {
-   using strings for *;
+  using strings for *;
+
   mapping (address => mapping (uint => EvaluatedCourse)) public studentEvaluations;
   mapping (address => mapping (uint => bool)) public studentCourseRegistrations;
   mapping (uint => Course) public availableCourses;
@@ -138,7 +139,9 @@ contract Evaluation {
         currentUintCnt++;
       }
       else{
-        studentEvaluations[msg.sender][_courseId].answersToTxtQuestions[i] = s.split(delim).toString();
+        var currentStr = s.split(delim).toString();
+        require(currentStr.toSlice().len() <= 128, "The answer exceeded 128 characters!");
+        studentEvaluations[msg.sender][_courseId].answersToTxtQuestions[i] = currentStr;
       }
     }
 
@@ -147,23 +150,6 @@ contract Evaluation {
     emit evaluatedEvent(_courseId);
     return true;
   }
-/*
-  function test2(uint _courseId, string _answers) public {
-    uint txtQAmount = getNumberOfUINTQuestions(_courseId);
-
-    var s = _answers.toSlice();
-    var delim = "//".toSlice();
-
-    for(uint i = 0; i < txtQAmount; i++) {
-      studentEvaluations[msg.sender][_courseId].testMap[i] = s.split(delim).toString();
-    }
-  }
-
-
-function readTest2(address _account, uint _courseId, uint _qId) public view returns(string){
-  return studentEvaluations[_account][_courseId].answersToTxtQuestions[_qId];
-}
-*/
 
   function registerAccountForCourseEval(address _account, uint _courseId) payable public inRegistrationInterval onlyAdmin {
     require(!studentCourseRegistrations[_account][_courseId], "Student is already registered");
@@ -215,13 +201,13 @@ function readTest2(address _account, uint _courseId, uint _qId) public view retu
   }
 
   function destroy() public onlyAdmin{
-   selfdestruct(owner); // send funds to organizers
+    selfdestruct(owner); // send funds to organizers
   }
 
   function contributeToContract() public payable {}
 
   function getContractBalance() public view returns (uint){
-   return address(this).balance;
+    return address(this).balance;
   }
 
 }
