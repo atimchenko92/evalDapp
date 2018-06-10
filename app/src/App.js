@@ -5,14 +5,17 @@ import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract';
 import evaluation_artifacts from './contracts/Evaluation.json';
 
+// UI Components
+import Header from './components/Header'
+
 class App extends Component {
   constructor(args){
     super(args);
     this.state = {
       account: '0x0',
-      candidates: [],
-      hasVoted: false,
+      coursesAvailable: []
     }
+
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
     if (typeof web3 !== 'undefined') {
       console.warn("Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
@@ -48,11 +51,33 @@ class App extends Component {
 
       self.setState({account: account});
       console.log(self.state.account);
+      self.loadAvailableCourses();
     });
   }
 
+  loadAvailableCourses() {
+    this.evaluation.deployed().then((evalInstance) => {
+      this.evalInstance = evalInstance
+      this.evaluationEvents()
+      this.evalInstance.getAvailableCourses(this.state.account).then((myCourses) => {
+        for (var i = 0; i < myCourses.length; i++) {
+          this.evalInstance.registeredCourses(myCourses[i]).then((courseInfo) => {
+            const coursesAvailable = [...this.state.coursesAvailable]
+            coursesAvailable.push({
+              id : courseInfo[0],
+              cKey: courseInfo[1],
+              lKey: courseInfo[2],
+              qNum: courseInfo[3]
+            });
+            this.setState({ coursesAvailable: coursesAvailable })
+          });
+        }
+      })
+    })
+  }
+
   evaluationEvents() {
-    this.evaluationEvents.evaluatedEvent({}, {
+    this.evalInstance.evaluatedEvent({}, {
       fromBlock: 0,
       toBlock: 'latest'
     }).watch((error, event) => {
@@ -63,6 +88,9 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        <Header
+          account={this.state.account}
+          coursesAvailable={this.state.coursesAvailable}/>
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome,
@@ -70,7 +98,7 @@ class App extends Component {
           </h1>
         </header>
         <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
+          To get started, edit <code>Hi!</code> and save to reload.
         </p>
       </div>
     );

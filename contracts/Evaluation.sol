@@ -10,7 +10,7 @@ contract Evaluation {
 
   mapping (address => mapping (uint => EvaluatedCourse)) public studentEvaluations;
   mapping (address => mapping (uint => bool)) public studentCourseRegistrations;
-  mapping (uint => Course) public availableCourses;
+  mapping (uint => Course) public registeredCourses;
 
   address public owner;
   uint public coursesCount;
@@ -89,11 +89,16 @@ contract Evaluation {
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q7);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q9);
 
+    //Just for test
+    registerAccountForCourseEval(owner, 1);
+    registerAccountForCourseEval(owner, 2);
+    registerAccountForCourseEval(owner, 3);
+
   }
 
   function registerCourseForEvaluation(HSKALib.Courses _courseKey, HSKALib.Lecturers _lecturerKey) private inRegistrationInterval returns (bool) {
     coursesCount++;
-    availableCourses[coursesCount] = Course ({
+    registeredCourses[coursesCount] = Course ({
        id: coursesCount,
        courseKey: _courseKey,
        lecturerKey: _lecturerKey,
@@ -104,7 +109,7 @@ contract Evaluation {
   }
 
   function assignQuestionToCourse(uint _courseId, QuestionsLib.QuestionArchetype _qarch) private inRegistrationInterval returns (bool) {
-     Course storage _course = availableCourses[_courseId];
+     Course storage _course = registeredCourses[_courseId];
     _course.questionsToEvaluate[_course.numberOfQuestions] = _qarch;
     _course.numberOfQuestions++;
 
@@ -130,10 +135,10 @@ contract Evaluation {
 
     uint currentUintCnt = 0;
 
-    for(uint i = 0; i < availableCourses[_courseId].numberOfQuestions; i++){
-      if (!QuestionsLib.isTextTypedInput(availableCourses[_courseId].questionsToEvaluate[i])){
+    for(uint i = 0; i < registeredCourses[_courseId].numberOfQuestions; i++){
+      if (!QuestionsLib.isTextTypedInput(registeredCourses[_courseId].questionsToEvaluate[i])){
         require(_uintAns[currentUintCnt] > 0
-          && _uintAns[currentUintCnt] <= QuestionsLib.getMaxVal(availableCourses[_courseId].questionsToEvaluate[i]),
+          && _uintAns[currentUintCnt] <= QuestionsLib.getMaxVal(registeredCourses[_courseId].questionsToEvaluate[i]),
         "Incorrect answer" );
         studentEvaluations[msg.sender][_courseId].answersToUIntQuestions[i] = _uintAns[currentUintCnt];
         currentUintCnt++;
@@ -153,26 +158,26 @@ contract Evaluation {
 
   function registerAccountForCourseEval(address _account, uint _courseId) payable public inRegistrationInterval onlyAdmin {
     require(!studentCourseRegistrations[_account][_courseId], "Student is already registered");
-    require(availableCourses[_courseId].id != 0, "The course is not registered");
+    require(registeredCourses[_courseId].id != 0, "The course is not registered");
     _account.transfer(msg.value);
     studentCourseRegistrations[_account][_courseId] = true;
     amountRegistered++;
   }
 
   function getCourseTitle(uint _cId) public view returns (string) {
-    return HSKALib.getCourseName(availableCourses[_cId].courseKey);
+    return HSKALib.getCourseName(registeredCourses[_cId].courseKey);
   }
 
   function getCourseLecturerName(uint _cId) public view returns (string) {
-    return HSKALib.getLecturerName(availableCourses[_cId].lecturerKey);
+    return HSKALib.getLecturerName(registeredCourses[_cId].lecturerKey);
   }
 
   function getQuestionBodyByCourse(uint _cId, uint _qId) public view returns (string) {
-    return QuestionsLib.getQuestionBody(availableCourses[_cId].questionsToEvaluate[_qId]);
+    return QuestionsLib.getQuestionBody(registeredCourses[_cId].questionsToEvaluate[_qId]);
   }
 
   function readEvaluation(address _account, uint _courseId, uint _qId) public view returns(string){
-    if(QuestionsLib.isTextTypedInput(availableCourses[_courseId].questionsToEvaluate[_qId]))
+    if(QuestionsLib.isTextTypedInput(registeredCourses[_courseId].questionsToEvaluate[_qId]))
       return studentEvaluations[_account][_courseId].answersToTxtQuestions[_qId];
     return Utils.uintToString(studentEvaluations[_account][_courseId].answersToUIntQuestions[_qId]);
   }
@@ -182,8 +187,8 @@ contract Evaluation {
   }
 
   function getNumberOfUINTQuestions(uint _courseId) public view returns(uint _counter) {
-    for(uint i=0; i<availableCourses[_courseId].numberOfQuestions; i++){
-      if(!QuestionsLib.isTextTypedInput(availableCourses[_courseId].questionsToEvaluate[i]))
+    for(uint i=0; i<registeredCourses[_courseId].numberOfQuestions; i++){
+      if(!QuestionsLib.isTextTypedInput(registeredCourses[_courseId].questionsToEvaluate[i]))
         _counter++;
     }
   }
@@ -208,6 +213,16 @@ contract Evaluation {
 
   function getContractBalance() public view returns (uint){
     return address(this).balance;
+  }
+
+  function getAvailableCourses(address _adr) public view returns (uint[] ){
+    //uint[] memory _resArr = new uint[](coursesCount);
+    uint[] _resArr;
+    for(uint i = 1; i <= coursesCount; i++)
+      if(studentCourseRegistrations[_adr][i] == true)
+        //_resArr[j] = i;
+        _resArr.push(i);
+    return _resArr;
   }
 
 }

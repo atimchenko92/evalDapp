@@ -264,6 +264,16 @@ contract('Evaluation', function(accounts) {
     assert.fail('Expected throw not received');
   });
 
+  it("getAvailableCourses test", async () => {
+    var answersUint = [6, 6];
+    await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
+    console.log(`Balanace before:${web3.eth.getBalance(accounts[1])}`);
+    let coursesArr = await eval.getAvailableCourses(accounts[1])
+    console.log(`Balanace after:${web3.eth.getBalance(accounts[1])}`);
+    assert.equal(coursesArr[0], 3, "Bad results");
+    console.log(coursesArr);
+  });
+
   //Do more tests...
   //??
   //Profit
