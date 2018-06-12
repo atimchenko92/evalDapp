@@ -4,7 +4,7 @@
 
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+  height: 50px;
 }
 
 .App-header {
@@ -18,8 +18,20 @@
   font-size: 1.5em;
 }
 
+.App-account {
+  color: magenta;
+}
+
 .App-intro {
   font-size: large;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+.navbar-brand>img {
+  padding: 7px 14px;
 }
 
 @keyframes App-logo-spin {

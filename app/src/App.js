@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './static/images/logo.svg';
 import './static/css/App.css';
 import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract';
@@ -7,11 +6,14 @@ import evaluation_artifacts from './contracts/Evaluation.json';
 
 // UI Components
 import Header from './components/Header'
+import Main from './components/Main'
 
 class App extends Component {
   constructor(args){
     super(args);
     this.state = {
+      isOwner: false,
+      loading: true,
       account: '0x0',
       coursesAvailable: []
     }
@@ -33,6 +35,8 @@ class App extends Component {
 
     //bind events
     this.evaluationEvents = this.evaluationEvents.bind(this)
+    this.handleCourseClick = this.handleCourseClick.bind(this)
+    this.handleRegisterForEvalClick = this.handleRegisterForEvalClick.bind(this)
   }
 
   componentWillMount(){
@@ -50,8 +54,35 @@ class App extends Component {
       }
 
       self.setState({account: account});
-      console.log(self.state.account);
-      self.loadAvailableCourses();
+      self.loadBasicContractInfo();
+    });
+  }
+
+  handleRegisterForEvalClick(){
+
+  }
+
+  handleCourseClick(){
+
+  }
+
+  loadCourseQuestions(){
+    var self = this;
+  }
+
+  loadBasicContractInfo(){
+    var self = this;
+    this.evaluation.deployed().then((evalInstance) => {
+      this.evalInstance = evalInstance
+      this.evalInstance.owner().then((owner)=>{
+        if(self.state.account === owner) {
+          self.setState({isOwner: true})
+        } else{
+          self.setState({isOwner: false})
+          self.loadAvailableCourses()
+        }
+        self.setState({loading: false})
+      })
     });
   }
 
@@ -90,16 +121,12 @@ class App extends Component {
       <div className="App">
         <Header
           account={this.state.account}
-          coursesAvailable={this.state.coursesAvailable}/>
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome,
-            <div className="App-titleAcc">{this.state.account}!</div>
-          </h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>Hi!</code> and save to reload.
-        </p>
+          isOwner={this.state.isOwner}
+          loading={this.state.loading}
+          coursesAvailable={this.state.coursesAvailable}
+          handleCourseClick={this.handleCourseClick.bind(this)}
+          handleRegisterForEvalClick={this.handleRegisterForEvalClick.bind(this)}/>
+        <Main/>
       </div>
     );
   }

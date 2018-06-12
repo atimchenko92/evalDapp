@@ -88,12 +88,6 @@ contract Evaluation {
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q5);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q7);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q9);
-
-    //Just for test
-    registerAccountForCourseEval(owner, 1);
-    registerAccountForCourseEval(owner, 2);
-    registerAccountForCourseEval(owner, 3);
-
   }
 
   function registerCourseForEvaluation(HSKALib.Courses _courseKey, HSKALib.Lecturers _lecturerKey) private inRegistrationInterval returns (bool) {

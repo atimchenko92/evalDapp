@@ -99,7 +99,7 @@ contract('Evaluation', function(accounts) {
   });
 
   it("Results of evaluation are saved correctly. Test#2", async () => {
-   var txt = "adas//33/44//22ASdadsad/AAdAd/A dasdASd//adas//55";
+   var txt = "adas///33/44//22ASdadsad/AAdAd/A dasdASd//adas//55";
    await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
    await eval.increaseNowTime(registration);
    await eval.evaluateCourse(3, answersUintTest2, txt, {from: accounts[1]});
@@ -112,7 +112,7 @@ contract('Evaluation', function(accounts) {
    assert.equal(savedAns, "adas", "The results of txt evaluation are not saved correctly");
 
    savedAns = await eval.readEvaluation(accounts[1], 3, 3, {from: owner});
-   assert.equal(savedAns, "33/44", "The results of txt evaluation are not saved correctly");
+   assert.equal(savedAns, "/33/44", "The results of txt evaluation are not saved correctly");
 
    savedAns = await eval.readEvaluation(accounts[1], 3, 4, {from: owner});
    assert.equal(savedAns, "22ASdadsad/AAdAd/A dasdASd", "The results of txt evaluation are not saved correctly");
