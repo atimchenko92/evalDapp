@@ -40,9 +40,9 @@ class Header extends Component {
           : (<div>Loading...</div>)
           }
           <Navbar.Text>
-            <div className="App-title">Signed in as
-            <span className="App-account"> {this.props.account}</span>
-            </div>
+            <span className="App-title">Signed in as
+              <span className="App-account"> {this.props.account}</span>
+            </span>
           </Navbar.Text>
           <Nav pullRight>
             <NavItem onSelect={()=>{history.push('/stats/')}}>
