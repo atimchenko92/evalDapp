@@ -59,11 +59,11 @@ class App extends Component {
   }
 
   handleRegisterForEvalClick(){
-
+  //  alert(`selected register`+k);
   }
 
-  handleCourseClick(){
-
+  handleCourseClick(k){
+//    alert(`selected `);
   }
 
   loadCourseQuestions(){

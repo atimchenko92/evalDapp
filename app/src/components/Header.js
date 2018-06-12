@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
+import { Route } from 'react-router-dom'
 
 import logo from '../static/images/HSKAlogo.png';
 
 class Header extends Component {
   render() {
     return(
+      <Route render={({ history}) => (
       <Navbar inverse collapseOnSelect>
         <Navbar.Header>
           <Navbar.Brand bsSize="large">
-            <a href="/">evalDapp
+            <a className="clickableStyle" onClick={()=>{history.push('/')}}>evalDapp
               <img src={logo} className="App-logo" alt="logo" />
             </a>
           </Navbar.Brand>
@@ -19,19 +21,19 @@ class Header extends Component {
         {!this.props.loading
           ? (<Nav>
             {this.props.isOwner
-              ? (<NavDropdown eventKey={3} title="Admin Tools" id="basic-nav-dropdown">
-                  <MenuItem onClick={this.props.handleRegisterForEvalClick()}>
+              ? (<NavDropdown title="Admin Tools" id="basic-nav-dropdown">
+                  <MenuItem onSelect={() => {history.push('/register/'); this.props.handleRegisterForEvalClick()}}>
                     Evaluation registration
                   </MenuItem>
                 </NavDropdown>)
-              : (<NavDropdown eventKey={3} title="Available Courses" id="basic-nav-dropdown">
+              : (<NavDropdown title="Available Courses" id="basic-nav-dropdown">
                   {this.props.coursesAvailable.map((course) => {
                     return(
-                      <MenuItem onClick={this.props.handleCourseClick()}eventKey={course.id.toNumber()} >{course.id.toNumber()}</MenuItem>
+                      <MenuItem onSelect={k=> { history.push('/course/'+k); this.props.handleCourseClick(k)}} eventKey={course.id.toNumber()} >{course.id.toNumber()}</MenuItem>
                     )
                   })}
                   <MenuItem divider />
-                  <MenuItem eventKey={3.4}>Already evaluated</MenuItem>
+                    <MenuItem>Already evaluated</MenuItem>
                 </NavDropdown>)
             }
             </Nav>)
@@ -43,15 +45,16 @@ class Header extends Component {
             </div>
           </Navbar.Text>
           <Nav pullRight>
-            <NavItem eventKey={1} href="/stats">
+            <NavItem onSelect={()=>{history.push('/stats/')}}>
               Show stats
             </NavItem>
-            <NavItem eventKey={2} href="/about">
+            <NavItem onSelect={()=>{history.push('/about/')}}>
               About
             </NavItem>
           </Nav>
         </Navbar.Collapse>
       </Navbar>
+      )} />
     )
   }
 }
