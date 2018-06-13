@@ -98,7 +98,7 @@ class EvalRegisterPlace extends Component {
     this.evaluation.deployed().then((evalInstance) => {
       var acc = this.myRefs.accountInput.value
       var courseId = this.myRefs.courseInput.value
-      var ethAmount = 5000000000000000;
+      var ethAmount = this.myRefs.ethInput.value
       evalInstance.registerAccountForCourseEval(acc, courseId, {from: self.state.account, value: ethAmount }).then((receipt) => {
       })
     })
@@ -106,26 +106,35 @@ class EvalRegisterPlace extends Component {
 
   render() {
     return(
-      <form onSubmit={this.handleEvalRegisterSubmit}>
-        <FormGroup controlId="formControlAccount">
-          <ControlLabel>Account</ControlLabel>
-          <FormControl inputRef={val => this.myRefs.accountInput = val} type="text" placeholder="0x123..." />
-        </FormGroup>
-        {!this.state.loading
-          ?(<FormGroup controlId="formControlSelect">
-            <ControlLabel>Course</ControlLabel>
-            <FormControl inputRef={val => this.myRefs.courseInput = val} componentClass="select" placeholder="Select course...">
-              {this.state.allCourses.map((course) => {
-                return(
-                  <option value={course.id.toNumber()}>{course.id.toNumber()}</option>
-                )
-              })}
-            </FormControl>
-          </FormGroup>)
-          : (<span>Loading...</span>)
-        }
-        <Button type="submit">Register for evaluation</Button>
-      </form>
+      <div>
+      {this.state.isOwner
+        ?(<form onSubmit={this.handleEvalRegisterSubmit}>
+          <FormGroup controlId="formControlAccount">
+            <ControlLabel>Account</ControlLabel>
+            <FormControl inputRef={val => this.myRefs.accountInput = val} type="text" placeholder="0x123..." />
+          </FormGroup>
+          {!this.state.loading
+            ?(<FormGroup controlId="formControlSelect">
+              <ControlLabel>Course</ControlLabel>
+              <FormControl inputRef={val => this.myRefs.courseInput = val} componentClass="select" placeholder="Select course...">
+                {this.state.allCourses.map((course) => {
+                  return(
+                    <option value={course.id.toNumber()}>{course.id.toNumber()}</option>
+                  )
+                })}
+              </FormControl>
+            </FormGroup>)
+            : (<span>Loading...</span>)
+          }
+          <FormGroup controlId="formControlAmount">
+            <ControlLabel>Eth amount</ControlLabel>
+            <FormControl inputRef={val => this.myRefs.ethInput = val} type="text" placeholder="5000000000000000" />
+          </FormGroup>
+          <Button type="submit">Register for evaluation</Button>
+        </form>)
+        :(<span>Sorry! Only for Admins</span>)
+      }
+      </div>
     );
   }
 }
