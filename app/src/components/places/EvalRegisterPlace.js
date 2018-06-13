@@ -94,24 +94,12 @@ class EvalRegisterPlace extends Component {
 
   handleEvalRegisterSubmit(e){
     if(e) e.preventDefault();
-
-    console.log(this.myRefs.accountInput.value)
-    console.log(this.myRefs.courseInput.value)
-
+    var self = this
     this.evaluation.deployed().then((evalInstance) => {
-      this.evalInstance.getAvailableCourses(this.state.account).then((myCourses) => {
-        for (var i = 0; i < myCourses.length; i++) {
-          this.evalInstance.registeredCourses(myCourses[i]).then((courseInfo) => {
-            const coursesAvailable = [...this.state.coursesAvailable]
-            coursesAvailable.push({
-              id : courseInfo[0],
-              cKey: courseInfo[1],
-              lKey: courseInfo[2],
-              qNum: courseInfo[3]
-            });
-            this.setState({ coursesAvailable: coursesAvailable })
-          });
-        }
+      var acc = this.myRefs.accountInput.value
+      var courseId = this.myRefs.courseInput.value
+      var ethAmount = 5000000000000000;
+      evalInstance.registerAccountForCourseEval(acc, courseId, {from: self.state.account, value: ethAmount }).then((receipt) => {
       })
     })
   }
