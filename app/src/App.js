@@ -67,7 +67,7 @@ class App extends Component {
   }
 
   loadCourseQuestions(){
-    var self = this;
+//    var self = this;
   }
 
   loadBasicContractInfo(){

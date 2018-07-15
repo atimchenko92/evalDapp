@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 library HSKALib {
   enum Lecturers {prof1, prof2, prof3}

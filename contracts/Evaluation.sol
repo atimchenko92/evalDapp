@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 import { QuestionsLib } from "./QuestionsLib.sol";
 import { HSKALib } from "./HSKALib.sol";
