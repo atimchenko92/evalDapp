@@ -19,8 +19,8 @@ library QuestionsLib {
   }
 
   function getRatingTextForVal(QuestionArchetype _qarch, uint _val) public pure returns(string) {
-    //Check val < Archetype's max val
     require(!isTextTypedInput(_qarch));
+    require(_val <= getMaxVal(_qarch) && _val >= 1);
     if ( _val == 1 ){
       if (_qarch == QuestionArchetype.q1 || _qarch == QuestionArchetype.q2
               || _qarch == QuestionArchetype.q3 || _qarch == QuestionArchetype.q4
