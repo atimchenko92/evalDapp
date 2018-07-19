@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, ControlLabel, Radio, Pager} from 'react-bootstrap';
-//import {Route} from 'react-router-dom'
 
 class QuestionContainer extends Component {
   render() {

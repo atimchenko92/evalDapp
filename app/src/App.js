@@ -4,6 +4,8 @@ import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract';
 import evaluation_artifacts from './contracts/Evaluation.json';
 
+import history from './history'
+
 // UI Components
 import Header from './components/Header'
 import Main from './components/Main'
@@ -59,10 +61,12 @@ class App extends Component {
   }
 
   handleRegisterForEvalClick(){
+    history.push('/register/');
   //  alert(`selected register`+k);
   }
 
   handleCourseClick(k){
+    history.push('/course/'+k);
 //    alert(`selected `);
   }
 

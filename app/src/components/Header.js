@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
-import { Route } from 'react-router-dom'
+import history from '../history'
 
 import logo from '../static/images/HSKAlogo.png';
 
 class Header extends Component {
   render() {
     return(
-      <Route render={({ history}) => (
       <Navbar inverse collapseOnSelect>
         <Navbar.Header>
           <Navbar.Brand bsSize="large">
@@ -22,14 +21,16 @@ class Header extends Component {
           ? (<Nav>
             {this.props.isOwner
               ? (<NavDropdown title="Admin Tools" id="basic-nav-dropdown">
-                  <MenuItem onSelect={() => {history.push('/register/'); this.props.handleRegisterForEvalClick()}}>
+                  <MenuItem onSelect={() => this.props.handleRegisterForEvalClick()}>
                     Evaluation registration
                   </MenuItem>
                 </NavDropdown>)
               : (<NavDropdown title="Available Courses" id="basic-nav-dropdown">
                   {this.props.coursesAvailable.map((course) => {
                     return(
-                      <MenuItem onSelect={k=> { history.push('/course/'+k); this.props.handleCourseClick(k)}} eventKey={course.id.toNumber()} >{course.id.toNumber()}</MenuItem>
+                      <MenuItem onSelect={k=> this.props.handleCourseClick(k)}
+                        eventKey={course.id.toNumber()}>{course.id.toNumber()}
+                      </MenuItem>
                     )
                   })}
                   <MenuItem divider />
@@ -54,7 +55,6 @@ class Header extends Component {
           </Nav>
         </Navbar.Collapse>
       </Navbar>
-      )} />
     )
   }
 }

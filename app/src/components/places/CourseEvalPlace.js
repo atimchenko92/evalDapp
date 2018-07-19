@@ -113,9 +113,6 @@ class CourseEvalPlace extends Component {
       this.setState({ curQuestion: resPrev })
       history.push('/course/'+this.state.currentCourse+'?qId='+ resPrev.qId);
     }
-    else{
-      console.log("bad state")
-    }
   }
 
   render() {
