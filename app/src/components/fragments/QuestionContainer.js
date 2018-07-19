@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, ControlLabel, Radio, Pager} from 'react-bootstrap';
-import { Route } from 'react-router-dom'
+import {Route} from 'react-router-dom'
 
 class QuestionContainer extends Component {
   render() {
@@ -10,7 +10,7 @@ class QuestionContainer extends Component {
           <span>{this.props.qInfo.qText}</span>
           {!this.props.qInfo.isTextual ?
             <FormGroup>
-              {this.props.qAnswers.map((ans) => {
+              {this.props.qInfo.answers.map((ans) => {
                 return(
                   <span>
                     <Radio name="qRadio" inline>
@@ -29,10 +29,14 @@ class QuestionContainer extends Component {
 
           <Pager>
             <Pager.Item disabled={this.props.qInfo.isFirst ? true : false }
-             onSelect={k=> { history.push('/course/'+this.props.qInfo.cId+'?qId='+ (--this.props.qInfo.qId)); this.props.handlePagerClick(k)}}
+             onSelect={k=> { var prevPage = this.props.handlePagerClick(k)
+                              history.push('/course/'+3+'?qId=' + prevPage);
+                             }}
              eventKey={'prev'}>Previous</Pager.Item>
             <Pager.Item disabled={this.props.qInfo.isLast ? true : false }
-             onSelect={k=> { history.push('/course/'+this.props.qInfo.cId+'?qId='+ (++this.props.qInfo.qId)); this.props.handlePagerClick(k)}}
+             onSelect={k=> { var nextPage = this.props.handlePagerClick(k)
+                             history.push('/course/'+3+'?qId='+ nextPage);
+                            }}
              eventKey={'next'}>Next</Pager.Item>
           </Pager>
         </span>
