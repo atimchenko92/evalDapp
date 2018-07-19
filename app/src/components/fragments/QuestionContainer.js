@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, ControlLabel, Radio, Pager} from 'react-bootstrap';
-import {Route} from 'react-router-dom'
+//import {Route} from 'react-router-dom'
 
 class QuestionContainer extends Component {
   render() {
     return(
-      <Route render={({ history}) => (
         <span>
           <span>{this.props.qInfo.qText}</span>
           {!this.props.qInfo.isTextual ?
@@ -29,18 +28,13 @@ class QuestionContainer extends Component {
 
           <Pager>
             <Pager.Item disabled={this.props.qInfo.isFirst ? true : false }
-             onSelect={k=> { var prevPage = this.props.handlePagerClick(k)
-                              history.push('/course/'+3+'?qId=' + prevPage);
-                             }}
+             onSelect={k=> this.props.handlePagerClick(k)}
              eventKey={'prev'}>Previous</Pager.Item>
             <Pager.Item disabled={this.props.qInfo.isLast ? true : false }
-             onSelect={k=> { var nextPage = this.props.handlePagerClick(k)
-                             history.push('/course/'+3+'?qId='+ nextPage);
-                            }}
+             onSelect={k=> this.props.handlePagerClick(k)}
              eventKey={'next'}>Next</Pager.Item>
           </Pager>
         </span>
-      )} />
     );
   }
 }

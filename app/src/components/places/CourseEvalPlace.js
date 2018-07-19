@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract';
 import evaluation_artifacts from '../../contracts/Evaluation.json';
+import history from '../../history'
 
 // UI Components
 import QuestionContainer from '../fragments/QuestionContainer'
@@ -105,12 +106,12 @@ class CourseEvalPlace extends Component {
     if(k==="next"){
       const resNext = this.state.courseQuestions.find(course => course.qId === (this.state.curQuestion.qId + 1))
       this.setState({ curQuestion: resNext })
-      return resNext.qId;
+      history.push('/course/'+this.state.currentCourse+'?qId='+ resNext.qId);
     }
     else if (k==="prev") {
       const resPrev = this.state.courseQuestions.find(course => course.qId === (this.state.curQuestion.qId - 1))
       this.setState({ curQuestion: resPrev })
-      return resPrev.qId;
+      history.push('/course/'+this.state.currentCourse+'?qId='+ resPrev.qId);
     }
     else{
       console.log("bad state")
