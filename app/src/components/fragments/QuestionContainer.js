@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 
 // UI-Components
 import { FormGroup, FormControl,
-   ControlLabel, Radio, Pager} from 'react-bootstrap'
+   ControlLabel, ToggleButton, ToggleButtonGroup, Pager} from 'react-bootstrap'
 
 class QuestionContainer extends Component {
   render() {
@@ -10,19 +10,18 @@ class QuestionContainer extends Component {
         <span>
           <span>{this.props.qInfo.qText}</span>
           {!this.props.qInfo.isTextual ?
-            <FormGroup>
+            <ToggleButtonGroup type="radio"
+              name="qRadio"
+              value={this.props.qInfo.chosenAnswer}
+              onChange={this.props.handleAnswerClick}>
               {this.props.qInfo.answers.map((ans) => {
                 return(
-                    <Radio inline
-                      checked={this.props.qInfo.chosenAnswer === ans.id}
-                      name="qRadio"
-                      eventKey={ans.id}
-                      onChange={k => this.props.handleAnswerClick(k)}>
+                    <ToggleButton value={ans.id}>
                       {ans.text === "" ? ans.id : ans.text}
-                    </Radio>
+                    </ToggleButton>
                 )})
               }
-            </FormGroup>
+            </ToggleButtonGroup>
             :
             <FormGroup controlId="formControlsTextarea">
               <ControlLabel>Give your opinion</ControlLabel>

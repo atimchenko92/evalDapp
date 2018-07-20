@@ -132,7 +132,9 @@ class CourseEvalPlace extends Component {
 
   handleAnswerClick (k){
     console.log(k + " is clicked")
-    this.state.curQuestion.chosenAnswer = k;
+    const qCopy = this.state.curQuestion
+    qCopy.chosenAnswer = k;
+    this.setState({ curQuestion: qCopy })
   }
 
   render() {
