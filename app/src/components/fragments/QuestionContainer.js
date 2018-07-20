@@ -1,5 +1,7 @@
-import React, { Component } from 'react';
-import { FormGroup, FormControl, ControlLabel, Radio, Pager} from 'react-bootstrap';
+import React, { Component } from 'react'
+
+// UI-Components
+import { FormGroup, FormControl, ControlLabel, Radio, Pager} from 'react-bootstrap'
 
 class QuestionContainer extends Component {
   render() {

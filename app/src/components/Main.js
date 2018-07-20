@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import React, { Component } from 'react'
+import { Switch, Route } from 'react-router-dom'
 
 //Places
 import HomePlace from './places/HomePlace'

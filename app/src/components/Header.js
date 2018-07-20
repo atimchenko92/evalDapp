@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
-import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
+import React, { Component } from 'react'
 import history from '../history'
 
+// UI-Components
+import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
 import logo from '../static/images/HSKAlogo.png';
 
 class Header extends Component {

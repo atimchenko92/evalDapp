@@ -1,10 +1,12 @@
-import React, { Component } from 'react';
-import { default as Web3} from 'web3';
-import { default as contract } from 'truffle-contract';
-import evaluation_artifacts from '../../contracts/Evaluation.json';
+import React, { Component } from 'react'
 import history from '../../history'
 
-// UI Components
+// Contract/truffle components
+import { default as Web3} from 'web3'
+import { default as contract } from 'truffle-contract'
+import evaluation_artifacts from '../../contracts/Evaluation.json'
+
+// Child Components
 import QuestionContainer from '../fragments/QuestionContainer'
 
 class CourseEvalPlace extends Component {

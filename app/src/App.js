@@ -1,12 +1,15 @@
-import React, { Component } from 'react';
-import './static/css/App.css';
+import React, { Component } from 'react'
+import history from './history'
+
+//UI-Components
+import './static/css/App.css'
+
+//Contract/truffle components
 import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract';
 import evaluation_artifacts from './contracts/Evaluation.json';
 
-import history from './history'
-
-// UI Components
+// Child Components
 import Header from './components/Header'
 import Main from './components/Main'
 

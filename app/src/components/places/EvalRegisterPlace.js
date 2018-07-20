@@ -1,9 +1,12 @@
-import React, { Component } from 'react';
-import { FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap';
+import React, { Component } from 'react'
 
-import { default as Web3} from 'web3';
-import { default as contract } from 'truffle-contract';
-import evaluation_artifacts from '../../contracts/Evaluation.json';
+// Contract/truffle components
+import { default as Web3} from 'web3'
+import { default as contract } from 'truffle-contract'
+import evaluation_artifacts from '../../contracts/Evaluation.json'
+
+// Child Components
+import EvalRegisterForm from '../fragments/EvalRegisterForm'
 
 class EvalRegisterPlace extends Component {
   constructor(args){
@@ -32,6 +35,9 @@ class EvalRegisterPlace extends Component {
 
     this.myRefs = {};
     this.handleEvalRegisterSubmit = this.handleEvalRegisterSubmit.bind(this);
+    this.handleAccInput = this.handleAccInput.bind(this);
+    this.handleEthInput = this.handleEthInput.bind(this);
+    this.handleCourseInput = this.handleCourseInput.bind(this);
   }
 
   componentWillMount(){
@@ -104,37 +110,30 @@ class EvalRegisterPlace extends Component {
     })
   }
 
+  handleAccInput(e){
+    this.myRefs.accountInput = e
+  }
+
+  handleCourseInput(e){
+   this.myRefs.courseInput = e
+  }
+
+  handleEthInput(e){
+   this.myRefs.ethInput = e
+  }
+
   render() {
     return(
-      <div>
-      {this.state.isOwner
-        ?(<form onSubmit={this.handleEvalRegisterSubmit}>
-          <FormGroup controlId="formControlAccount">
-            <ControlLabel>Account</ControlLabel>
-            <FormControl inputRef={val => this.myRefs.accountInput = val} type="text" placeholder="0x123..." />
-          </FormGroup>
-          {!this.state.loading
-            ?(<FormGroup controlId="formControlSelect">
-              <ControlLabel>Course</ControlLabel>
-              <FormControl inputRef={val => this.myRefs.courseInput = val} componentClass="select" placeholder="Select course...">
-                {this.state.allCourses.map((course) => {
-                  return(
-                    <option value={course.id.toNumber()}>{course.id.toNumber()}</option>
-                  )
-                })}
-              </FormControl>
-            </FormGroup>)
-            : (<span>Loading...</span>)
-          }
-          <FormGroup controlId="formControlAmount">
-            <ControlLabel>Eth amount</ControlLabel>
-            <FormControl inputRef={val => this.myRefs.ethInput = val} type="text" placeholder="5000000000000000" />
-          </FormGroup>
-          <Button type="submit">Register for evaluation</Button>
-        </form>)
-        :(<span>Sorry! Only for Admins</span>)
-      }
-      </div>
+      this.state.loading ?
+        <span> Loading ... </span> :
+      (this.state.isOwner ?
+        <EvalRegisterForm
+          allCourses={this.state.allCourses}
+          handleEvalRegisterSubmit={this.handleEvalRegisterSubmit.bind(this)}
+          handleAccInput={this.handleAccInput.bind(this)}
+          handleEthInput={this.handleEthInput.bind(this)}
+          handleCourseInput={this.handleCourseInput.bind(this)}/> :
+        <span> Sorry! Only for Admins</span>)
     );
   }
 }
