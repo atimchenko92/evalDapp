@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 
 // UI-Components
-import { FormGroup, FormControl, ControlLabel, Radio, Pager} from 'react-bootstrap'
+import { FormGroup, FormControl,
+   ControlLabel, Radio, Pager} from 'react-bootstrap'
 
 class QuestionContainer extends Component {
   render() {
@@ -12,18 +13,21 @@ class QuestionContainer extends Component {
             <FormGroup>
               {this.props.qInfo.answers.map((ans) => {
                 return(
-                  <span>
-                    <Radio name="qRadio" inline>
+                    <Radio inline
+                      checked={this.props.qInfo.chosenAnswer === ans.id}
+                      name="qRadio"
+                      eventKey={ans.id}
+                      onChange={k => this.props.handleAnswerClick(k)}>
                       {ans.text === "" ? ans.id : ans.text}
-                    </Radio>{' '}
-                  </span>
+                    </Radio>
                 )})
               }
             </FormGroup>
             :
             <FormGroup controlId="formControlsTextarea">
               <ControlLabel>Give your opinion</ControlLabel>
-              <FormControl componentClass="textarea" placeholder="Max. 128 characters" />
+              <FormControl componentClass="textarea"
+                placeholder="Max. 128 characters" />
             </FormGroup>
           }
 

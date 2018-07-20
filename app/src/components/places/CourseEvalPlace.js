@@ -9,6 +9,9 @@ import evaluation_artifacts from '../../contracts/Evaluation.json'
 // Child Components
 import QuestionContainer from '../fragments/QuestionContainer'
 
+// UI-Components
+import { Button } from 'react-bootstrap'
+
 class CourseEvalPlace extends Component {
   constructor(args){
     super(args);
@@ -39,6 +42,7 @@ class CourseEvalPlace extends Component {
 
     this.myRefs = {};
     this.handlePagerClick = this.handlePagerClick.bind(this);
+    this.handleAnswerClick = this.handleAnswerClick.bind(this);
   }
 
   componentWillMount(){
@@ -61,6 +65,10 @@ class CourseEvalPlace extends Component {
   }
 
   loadBasicCourseInfo (){
+    this.loadMockQuestions1()
+  }
+
+  loadMockQuestions1 (){
     var courseQuestions = []
     //Mock questions: #1
     var cQuestion_1 = {qId: 1, qText: "1. How would you rate sandwich?",
@@ -104,7 +112,11 @@ class CourseEvalPlace extends Component {
     this.setState({loading : false})
   }
 
-   handlePagerClick (k){
+  isCourseReadyForEvaluation(){
+    return false;
+  }
+
+  handlePagerClick (k){
     if(k==="next"){
       const resNext = this.state.courseQuestions.find(course => course.qId === (this.state.curQuestion.qId + 1))
       this.setState({ curQuestion: resNext })
@@ -115,17 +127,28 @@ class CourseEvalPlace extends Component {
       this.setState({ curQuestion: resPrev })
       history.push('/course/'+this.state.currentCourse+'?qId='+ resPrev.qId);
     }
+    else return
+  }
+
+  handleAnswerClick (k){
+    console.log(k + " is clicked")
+    this.state.curQuestion.chosenAnswer = k;
   }
 
   render() {
     return(
       <span>
         {!this.state.loading ?
-        <QuestionContainer qInfo={this.state.curQuestion}
-         handlePagerClick={this.handlePagerClick.bind(this)} /> :
-         <span>Loading...</span>
+          <span>
+            <QuestionContainer
+              qInfo={this.state.curQuestion}
+              handleAnswerClick={this.handleAnswerClick.bind(this)}
+              handlePagerClick={this.handlePagerClick.bind(this)} />
+            <Button bsStyle="success">Evaluate the course</Button>
+          </span>:
+          <span>Loading...</span>
         }
-      </span>
+       </span>
     );
   }
 }
