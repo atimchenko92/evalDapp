@@ -25,6 +25,8 @@ class CourseEvalPlace extends Component {
       curQuestion: {}
     }
 
+    console.log("In course place:"+this.state.currentCourse)
+
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
     if (typeof web3 !== 'undefined') {
       console.warn("Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
@@ -43,9 +45,13 @@ class CourseEvalPlace extends Component {
     this.myRefs = {};
     this.handlePagerClick = this.handlePagerClick.bind(this);
     this.handleAnswerClick = this.handleAnswerClick.bind(this);
+    this.setState({currentCourse: args.match.params.number});
+
+    console.log(this.props)
   }
 
   componentWillMount(){
+    console.log("in course eval place")
     var self = this;
     window.web3.eth.getCoinbase(function(err, account) {
       if (err != null) {
@@ -60,15 +66,35 @@ class CourseEvalPlace extends Component {
       }
 
       self.setState({account: account});
-      self.loadBasicCourseInfo();
+      self.loadBasicCourseInfo(self.state.currentCourse);
     });
   }
 
-  loadBasicCourseInfo (){
-    this.loadMockQuestions1()
+  loadBasicCourseInfo (courseToBeLoaded){
+    this.evaluation.deployed().then((evalInstance) => {
+      this.evalInstance = evalInstance
+      var self = this
+      this.evalInstance.registeredCourses(courseToBeLoaded).then((courseInfo) => {
+        const qMax = courseInfo[3];
+        console.log("Course questions to be loaded: "+courseToBeLoaded);
+        for (var i = 1; i <= qMax; i++) {
+          self.evalInstance.getQuestionBodyByCourse(courseToBeLoaded, i)
+          .then((qBody) => {
+            console.log(qBody)
+          });
+        }
+        this.setState({ currentCourse: courseToBeLoaded})
+        this.loadMockQuestions1()
+      });
+    })
+  }
+
+  loadCourseQuestions(){
+
   }
 
   loadMockQuestions1 (){
+    console.log("load questions of course#"+this.state.currentCourse)
     var courseQuestions = []
     //Mock questions: #1
     var cQuestion_1 = {qId: 1, qText: "1. How would you rate sandwich?",
@@ -108,8 +134,9 @@ class CourseEvalPlace extends Component {
     courseQuestions.push(cQuestion_2)
     courseQuestions.push(cQuestion_3)
 
-    this.setState({ courseQuestions: courseQuestions, curQuestion: cQuestion_1 })
-    this.setState({loading : false})
+    this.setState({ courseQuestions: courseQuestions,
+      curQuestion: cQuestion_1,
+      loading: false})
   }
 
   isCourseReadyForEvaluation(){
@@ -138,12 +165,21 @@ class CourseEvalPlace extends Component {
   }
 
   render() {
+    console.log("Rendering CourseEvalPlace. Course#:"+this.state.currentCourse)
+    console.log("CourseEvPlace props")
+    console.log(this.state)
+
+    if(this.props.match.params.number !== this.state.currentCourse){
+//      this.setState({currentCourse: this.props.match.params.number})
+      this.loadBasicCourseInfo(this.props.match.params.number)
+    }
     return(
       <span>
         {!this.state.loading ?
           <span>
             <QuestionContainer
               qInfo={this.state.curQuestion}
+              currentCourse={this.state.currentCourse}
               handleAnswerClick={this.handleAnswerClick.bind(this)}
               handlePagerClick={this.handlePagerClick.bind(this)} />
             <Button bsStyle="success">Evaluate the course</Button>

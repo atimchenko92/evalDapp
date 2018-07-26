@@ -6,6 +6,9 @@ import { FormGroup, FormControl,
 
 class QuestionContainer extends Component {
   render() {
+    console.log("Render: qContainer. \nProps:")
+    console.log(this.props)
+    console.log(this.props.qInfo.chosenAnswer)
     return(
         <span>
           <span>{this.props.qInfo.qText}</span>
@@ -15,6 +18,7 @@ class QuestionContainer extends Component {
               value={this.props.qInfo.chosenAnswer}
               onChange={this.props.handleAnswerClick}>
               {this.props.qInfo.answers.map((ans) => {
+                console.log("ans.id:"+ans.id);
                 return(
                     <ToggleButton value={ans.id}>
                       {ans.text === "" ? ans.id : ans.text}

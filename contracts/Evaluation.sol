@@ -218,5 +218,4 @@ contract Evaluation {
         _resArr.push(i);
     return _resArr;
   }
-
 }

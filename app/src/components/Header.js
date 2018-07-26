@@ -29,7 +29,7 @@ class Header extends Component {
               : (<NavDropdown title="Available Courses" id="basic-nav-dropdown">
                   {this.props.coursesAvailable.map((course) => {
                     return(
-                      <MenuItem onSelect={k=> this.props.handleCourseClick(k)}
+                      <MenuItem onSelect={ k => this.props.handleCourseClick(k)}
                         eventKey={course.id.toNumber()}>{course.id.toNumber()}
                       </MenuItem>
                     )

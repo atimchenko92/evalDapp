@@ -70,7 +70,7 @@ class App extends Component {
 
   handleCourseClick(k){
     history.push('/course/'+k);
-//    alert(`selected `);
+    console.log("course clicked")
   }
 
   loadCourseQuestions(){
@@ -101,6 +101,7 @@ class App extends Component {
         for (var i = 0; i < myCourses.length; i++) {
           this.evalInstance.registeredCourses(myCourses[i]).then((courseInfo) => {
             const coursesAvailable = [...this.state.coursesAvailable]
+            console.log(coursesAvailable)
             coursesAvailable.push({
               id : courseInfo[0],
               cKey: courseInfo[1],
