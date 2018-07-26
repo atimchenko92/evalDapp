@@ -218,4 +218,13 @@ contract Evaluation {
         _resArr.push(i);
     return _resArr;
   }
+
+  function getMaxAnswerForQuestionWrapper(uint _cId, uint _qId) public view returns (uint){
+    return QuestionsLib.getMaxVal(registeredCourses[_cId].questionsToEvaluate[_qId]);
+  }
+
+  function getRatingTextForValWrapper(uint _cId, uint _qId, uint _ansId) public view returns (string){
+    return QuestionsLib.getRatingTextForVal(registeredCourses[_cId].questionsToEvaluate[_qId], _ansId);
+  }
+
 }

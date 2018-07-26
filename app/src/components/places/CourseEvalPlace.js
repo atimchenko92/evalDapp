@@ -73,14 +73,27 @@ class CourseEvalPlace extends Component {
   loadBasicCourseInfo (courseToBeLoaded){
     this.evaluation.deployed().then((evalInstance) => {
       this.evalInstance = evalInstance
-      var self = this
+//      var self = this
       this.evalInstance.registeredCourses(courseToBeLoaded).then((courseInfo) => {
         const qMax = courseInfo[3];
         console.log("Course questions to be loaded: "+courseToBeLoaded);
         for (var i = 1; i <= qMax; i++) {
-          self.evalInstance.getQuestionBodyByCourse(courseToBeLoaded, i)
+          this.evalInstance.getQuestionBodyByCourse(courseToBeLoaded, i)
           .then((qBody) => {
             console.log(qBody)
+            //TODO: get max answers, load answer text for each question
+            //TODO: is loaded logic for every question
+            this.evalInstance.getMaxAnswerForQuestionWrapper(courseToBeLoaded, i)
+              .then((maxAnswers) => {
+                console.log("InMaxAnswers:" + maxAnswers)
+                for (var j = 1; j <= maxAnswers; j++){
+                  console.log("Truffle answer:"+j)
+                  this.evalInstance.getRatingTextForValWrapper(courseToBeLoaded, i, j)
+                  .then((ansText) => {
+                    console.log(ansText)
+                  });
+                }
+              });
           });
         }
         this.setState({ currentCourse: courseToBeLoaded})

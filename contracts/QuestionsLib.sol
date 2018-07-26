@@ -4,7 +4,8 @@ library QuestionsLib {
   enum QuestionArchetype {q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11}
 
   function getMaxVal(QuestionArchetype _qarch) public pure returns(uint) {
-    require(!isTextTypedInput(_qarch));
+    if(isTextTypedInput(_qarch))
+      return 0;
     if(_qarch == QuestionArchetype.q7 || _qarch == QuestionArchetype.q8
         || _qarch == QuestionArchetype.q9 || _qarch == QuestionArchetype.q10)
       return 5;
