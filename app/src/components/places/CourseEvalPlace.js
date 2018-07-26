@@ -71,33 +71,35 @@ class CourseEvalPlace extends Component {
   }
 
   loadBasicCourseInfo (courseToBeLoaded){
+    this.setState({ currentCourse: courseToBeLoaded})
+    this.loadMockQuestions1()
     this.evaluation.deployed().then((evalInstance) => {
       this.evalInstance = evalInstance
 //      var self = this
       this.evalInstance.registeredCourses(courseToBeLoaded).then((courseInfo) => {
         const qMax = courseInfo[3];
-        console.log("Course questions to be loaded: "+courseToBeLoaded);
+        console.log("Course questions to be loaded: "+courseToBeLoaded+". Number of questions:"+qMax);
         for (var i = 1; i <= qMax; i++) {
+          console.log("current watched:"+i)
           this.evalInstance.getQuestionBodyByCourse(courseToBeLoaded, i)
           .then((qBody) => {
-            console.log(qBody)
+            console.log("Question #"+i+": "+qBody)
             //TODO: get max answers, load answer text for each question
             //TODO: is loaded logic for every question
             this.evalInstance.getMaxAnswerForQuestionWrapper(courseToBeLoaded, i)
               .then((maxAnswers) => {
-                console.log("InMaxAnswers:" + maxAnswers)
+                console.log("Question #"+ i + "-- max answers:"+maxAnswers)
                 for (var j = 1; j <= maxAnswers; j++){
-                  console.log("Truffle answer:"+j)
                   this.evalInstance.getRatingTextForValWrapper(courseToBeLoaded, i, j)
                   .then((ansText) => {
-                    console.log(ansText)
+                    console.log("Question #" + i + ", answer #" + j + ":" + ansText)
                   });
                 }
               });
           });
         }
-        this.setState({ currentCourse: courseToBeLoaded})
-        this.loadMockQuestions1()
+//        this.setState({ currentCourse: courseToBeLoaded})
+//        this.loadMockQuestions1()
       });
     })
   }
