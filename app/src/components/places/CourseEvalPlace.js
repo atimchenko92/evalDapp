@@ -70,88 +70,40 @@ class CourseEvalPlace extends Component {
     });
   }
 
-  loadBasicCourseInfo (courseToBeLoaded){
+  async loadBasicCourseInfo (courseToBeLoaded){
     this.setState({ currentCourse: courseToBeLoaded})
-    this.loadMockQuestions1()
     this.evaluation.deployed().then((evalInstance) => {
       this.evalInstance = evalInstance
-//      var self = this
-      this.evalInstance.registeredCourses(courseToBeLoaded).then((courseInfo) => {
-        const qMax = courseInfo[3];
-        console.log("Course questions to be loaded: "+courseToBeLoaded+". Number of questions:"+qMax);
-        for (var i = 1; i <= qMax; i++) {
-          console.log("current watched:"+i)
-          this.evalInstance.getQuestionBodyByCourse(courseToBeLoaded, i)
-          .then((qBody) => {
-            console.log("Question #"+i+": "+qBody)
-            //TODO: get max answers, load answer text for each question
-            //TODO: is loaded logic for every question
-            this.evalInstance.getMaxAnswerForQuestionWrapper(courseToBeLoaded, i)
-              .then((maxAnswers) => {
-                console.log("Question #"+ i + "-- max answers:"+maxAnswers)
-                for (var j = 1; j <= maxAnswers; j++){
-                  this.evalInstance.getRatingTextForValWrapper(courseToBeLoaded, i, j)
-                  .then((ansText) => {
-                    console.log("Question #" + i + ", answer #" + j + ":" + ansText)
-                  });
-                }
-              });
-          });
-        }
-//        this.setState({ currentCourse: courseToBeLoaded})
-//        this.loadMockQuestions1()
-      });
+      this.loadCourseQuestions(evalInstance, courseToBeLoaded)
     })
   }
 
-  loadCourseQuestions(){
-
-  }
-
-  loadMockQuestions1 (){
-    console.log("load questions of course#"+this.state.currentCourse)
+  async loadCourseQuestions(evalInstance, courseToBeLoaded){
+    var curQuestion = {}
     var courseQuestions = []
-    //Mock questions: #1
-    var cQuestion_1 = {qId: 1, qText: "1. How would you rate sandwich?",
-     isTextual: false, isFirst: true,
-     isLast: false, answers: [], chosenAnswer: ""}
-    //Add answers
-    cQuestion_1.answers.push({id: 1, text: 'Not good'})
-    cQuestion_1.answers.push({id: 2, text: ''})
-    cQuestion_1.answers.push({id: 3, text: ''})
-    cQuestion_1.answers.push({id: 4, text: ''})
-    cQuestion_1.answers.push({id: 5, text: 'Very good'})
-
-    //#2
-    var cQuestion_2 = {qId: 2, qText: "2. How would you rate cola?",
-     isTextual: false, isFirst: false,
-     isLast: false, answers: [], chosenAnswer: ""}
-
-    cQuestion_2.answers.push({id: 1, text: 'Not good'})
-    cQuestion_2.answers.push({id: 2, text: ''})
-    cQuestion_2.answers.push({id: 3, text: ''})
-    cQuestion_2.answers.push({id: 4, text: ''})
-    cQuestion_2.answers.push({id: 5, text: 'Very good'})
-
-    //#3
-    var cQuestion_3 = {qId: 3, qText: "3. How would you rate vodka?",
-     isTextual: false, isFirst: false,
-     isLast: true, answers: [], chosenAnswer: ""}
-
-    cQuestion_3.answers.push({id: 1, text: 'Not good'})
-    cQuestion_3.answers.push({id: 2, text: ''})
-    cQuestion_3.answers.push({id: 3, text: ''})
-    cQuestion_3.answers.push({id: 4, text: ''})
-    cQuestion_3.answers.push({id: 5, text: 'Very good'})
-
-
-    courseQuestions.push(cQuestion_1)
-    courseQuestions.push(cQuestion_2)
-    courseQuestions.push(cQuestion_3)
-
+    let courseInfo = await evalInstance.registeredCourses(courseToBeLoaded)
+    const qMax = courseInfo[3];
+    //Load questions
+    for (var i = 1; i <= qMax; i++) {
+      let qBody = await evalInstance
+        .getQuestionBodyByCourse(courseToBeLoaded, i)
+      curQuestion = {qId: i, qText: qBody,
+       isTextual: false, isFirst: (i === 1) ? true : false,
+       isLast: (i == qMax) ? true : false,
+       answers: [], chosenAnswer: ""
+      }
+      let maxAnswers = await evalInstance
+        .getMaxAnswerForQuestionWrapper(courseToBeLoaded, i)
+      //Load answers:
+      for (var j = 1; j <= maxAnswers; j++){
+        let ansText = await evalInstance
+          .getRatingTextForValWrapper(courseToBeLoaded, i, j)
+        curQuestion.answers.push({id: j, text: ansText})
+      }
+      courseQuestions.push(curQuestion)
+    }
     this.setState({ courseQuestions: courseQuestions,
-      curQuestion: cQuestion_1,
-      loading: false})
+      curQuestion: courseQuestions[0], loading : false})
   }
 
   isCourseReadyForEvaluation(){
