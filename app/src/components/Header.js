@@ -30,7 +30,8 @@ class Header extends Component {
                   {this.props.coursesAvailable.map((course) => {
                     return(
                       <MenuItem onSelect={ k => this.props.handleCourseClick(k)}
-                        eventKey={course.id.toNumber()}>{course.id.toNumber()}
+                        eventKey={course.id.toNumber()}>{course.cName}
+                        [id={course.id.toNumber()}]
                       </MenuItem>
                     )
                   })}

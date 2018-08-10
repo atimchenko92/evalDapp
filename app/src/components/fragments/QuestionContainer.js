@@ -30,7 +30,8 @@ class QuestionContainer extends Component {
             <FormGroup controlId="formControlsTextarea">
               <ControlLabel>Give your opinion</ControlLabel>
               <FormControl componentClass="textarea"
-                placeholder="Max. 128 characters" />
+                placeholder="Max. 128 characters"
+                inputRef={e => this.props.handleAnswerTextual(e)}/>
             </FormGroup>
           }
 

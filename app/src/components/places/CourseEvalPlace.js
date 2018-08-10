@@ -45,6 +45,7 @@ class CourseEvalPlace extends Component {
     this.myRefs = {};
     this.handlePagerClick = this.handlePagerClick.bind(this);
     this.handleAnswerClick = this.handleAnswerClick.bind(this);
+    this.handleAnswerTextual = this.handleAnswerTextual.bind(this);
     this.setState({currentCourse: args.match.params.number});
 
     console.log(this.props)
@@ -81,29 +82,43 @@ class CourseEvalPlace extends Component {
   async loadCourseQuestions(evalInstance, courseToBeLoaded){
     var curQuestion = {}
     var courseQuestions = []
-    let courseInfo = await evalInstance.registeredCourses(courseToBeLoaded)
-    const qMax = courseInfo[3];
-    //Load questions
-    for (var i = 1; i <= qMax; i++) {
-      let qBody = await evalInstance
-        .getQuestionBodyByCourse(courseToBeLoaded, i)
-      curQuestion = {qId: i, qText: qBody,
-       isTextual: false, isFirst: (i === 1) ? true : false,
-       isLast: (i == qMax) ? true : false,
-       answers: [], chosenAnswer: ""
+
+    let isAvailable = await evalInstance
+      .checkRegistration(this.state.account, courseToBeLoaded)
+    if(isAvailable === false){
+      this.setState({ courseQuestions: [],
+        curQuestion: {}, loading : false})
+    } else {
+      let courseInfo = await evalInstance.registeredCourses(courseToBeLoaded)
+      const qMax = courseInfo[3];
+      //Load questions
+      for (var i = 1; i <= qMax; i++) {
+        let qBody = await evalInstance
+          .getQuestionBodyByCourse(courseToBeLoaded, i)
+        curQuestion = {qId: i, qText: qBody,
+         isTextual: false, isFirst: (i === 1) ? true : false,
+         isLast: (i === qMax.toNumber()) ? true : false,
+         answers: [], chosenAnswer: ""
+        }
+
+        let maxAnswers = await evalInstance
+          .getMaxAnswerForQuestionWrapper(courseToBeLoaded, i)
+
+        if(maxAnswers.toNumber() === 0)
+          curQuestion.isTextual = true
+
+        //Load answers:
+        for (var j = 1; j <= maxAnswers; j++){
+          let ansText = await evalInstance
+            .getRatingTextForValWrapper(courseToBeLoaded, i, j)
+          curQuestion.answers.push({id: j, text: ansText})
+        }
+        courseQuestions.push(curQuestion)
       }
-      let maxAnswers = await evalInstance
-        .getMaxAnswerForQuestionWrapper(courseToBeLoaded, i)
-      //Load answers:
-      for (var j = 1; j <= maxAnswers; j++){
-        let ansText = await evalInstance
-          .getRatingTextForValWrapper(courseToBeLoaded, i, j)
-        curQuestion.answers.push({id: j, text: ansText})
-      }
-      courseQuestions.push(curQuestion)
+      this.setState({ courseQuestions: courseQuestions,
+        curQuestion: courseQuestions[0], loading : false,
+        isAvailable : true})
     }
-    this.setState({ courseQuestions: courseQuestions,
-      curQuestion: courseQuestions[0], loading : false})
   }
 
   isCourseReadyForEvaluation(){
@@ -111,17 +126,34 @@ class CourseEvalPlace extends Component {
   }
 
   handlePagerClick (k){
+    if(this.state.curQuestion.isTextual === true)
+      this.preserveTextualAnswer()
+
     if(k==="next"){
       const resNext = this.state.courseQuestions.find(course => course.qId === (this.state.curQuestion.qId + 1))
       this.setState({ curQuestion: resNext })
+      this.myRefs.textInput.value = resNext.chosenAnswer
       history.push('/course/'+this.state.currentCourse+'?qId='+ resNext.qId);
     }
     else if (k==="prev") {
       const resPrev = this.state.courseQuestions.find(course => course.qId === (this.state.curQuestion.qId - 1))
       this.setState({ curQuestion: resPrev })
+      this.myRefs.textInput.value = resPrev.chosenAnswer
       history.push('/course/'+this.state.currentCourse+'?qId='+ resPrev.qId);
     }
     else return
+  }
+
+  handleAnswerTextual (e){
+    this.myRefs.textInput = e
+    console.log(e)
+  }
+
+  preserveTextualAnswer (){
+    //TODO: acquire textual input either after pager or after "evaluate button"
+    const qCopy = this.state.curQuestion
+    qCopy.chosenAnswer = this.myRefs.textInput.value
+    this.setState({curQuestion: qCopy})
   }
 
   handleAnswerClick (k){
@@ -137,19 +169,25 @@ class CourseEvalPlace extends Component {
     console.log(this.state)
 
     if(this.props.match.params.number !== this.state.currentCourse){
-//      this.setState({currentCourse: this.props.match.params.number})
       this.loadBasicCourseInfo(this.props.match.params.number)
     }
     return(
       <span>
         {!this.state.loading ?
           <span>
-            <QuestionContainer
-              qInfo={this.state.curQuestion}
-              currentCourse={this.state.currentCourse}
-              handleAnswerClick={this.handleAnswerClick.bind(this)}
-              handlePagerClick={this.handlePagerClick.bind(this)} />
-            <Button bsStyle="success">Evaluate the course</Button>
+          {this.state.isAvailable ?
+            <span>
+              <QuestionContainer
+                qInfo={this.state.curQuestion}
+                currentCourse={this.state.currentCourse}
+                handleAnswerClick={this.handleAnswerClick.bind(this)}
+                handleAnswerTextual={this.handleAnswerTextual.bind(this)}
+                handlePagerClick={this.handlePagerClick.bind(this)} />
+              <Button bsStyle="success">Evaluate the course</Button>
+            </span>:
+            <span>Sorry, you are not yet registered
+            for this course evaluation</span>
+          }
           </span>:
           <span>Loading...</span>
         }

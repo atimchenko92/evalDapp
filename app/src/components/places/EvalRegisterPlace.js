@@ -59,55 +59,48 @@ class EvalRegisterPlace extends Component {
     });
   }
 
-  loadBasicContractInfo(){
-    var self = this;
+  async loadBasicContractInfo(){
     this.evaluation.deployed().then((evalInstance) => {
-      this.evalInstance = evalInstance
-      this.evalInstance.owner().then((owner)=>{
-        if(self.state.account === owner) {
-          self.setState({isOwner: true})
-          self.loadAllCourses()
-        } else{
-          self.setState({isOwner: false})
-        }
-        self.setState({loading: false})
-      })
+      this.loadAllCourses(evalInstance)
     });
   }
 
-  loadAllCourses(){
-    var self = this;
-    this.evaluation.deployed().then((evalInstance) => {
-      this.evalInstance = evalInstance;
-      var self2 = this;
-      this.evalInstance.coursesCount().then((coursesCount)=>{
-        console.log(coursesCount.toNumber())
-        for(var i = 1; i <= coursesCount.toNumber(); i++){
-          self2.evalInstance.registeredCourses(i).then((courseInfo) => {
-            const currentCourses = [...self.state.allCourses]
-            currentCourses.push({
-              id : courseInfo[0],
-              cKey: courseInfo[1],
-              lKey: courseInfo[2],
-              qNum: courseInfo[3]
-            });
-            self.setState({ allCourses: currentCourses})
-          });
-        }
+  async loadAllCourses(evalInstance){
+    let contractOwner = await evalInstance.owner()
+    if(this.state.account !== contractOwner) {
+      this.setState({isOwner: false, loading: false})
+      return
+    }
+
+    let coursesCount = await evalInstance.coursesCount()
+    for(var i = 1; i <= coursesCount.toNumber(); i++){
+      let courseInfo = await evalInstance.registeredCourses(i)
+      let courseName = await evalInstance.getCourseTitle(i)
+      const currentCourses = [...this.state.allCourses]
+      currentCourses.push({
+        id : courseInfo[0],
+        cKey: courseInfo[1],
+        lKey: courseInfo[2],
+        qNum: courseInfo[3],
+        cName: courseName
       });
-    });
+      this.setState({ allCourses: currentCourses, isOwner: true, loading: false})
+    }
   }
 
-  handleEvalRegisterSubmit(e){
+  async handleEvalRegisterSubmit(e){
     if(e) e.preventDefault();
-    var self = this
     this.evaluation.deployed().then((evalInstance) => {
-      var acc = this.myRefs.accountInput.value
-      var courseId = this.myRefs.courseInput.value
-      var ethAmount = this.myRefs.ethInput.value
-      evalInstance.registerAccountForCourseEval(acc, courseId, {from: self.state.account, value: ethAmount }).then((receipt) => {
-      })
+      this.manageEvalRegistration(evalInstance)
     })
+  }
+
+  async manageEvalRegistration(evalInstance){
+    var acc = this.myRefs.accountInput.value
+    var courseId = this.myRefs.courseInput.value
+    var ethAmount = this.myRefs.ethInput.value
+    await evalInstance.registerAccountForCourseEval(acc, courseId,
+       {from: this.state.account, value: ethAmount })
   }
 
   handleAccInput(e){

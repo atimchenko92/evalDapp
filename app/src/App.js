@@ -65,7 +65,6 @@ class App extends Component {
 
   handleRegisterForEvalClick(){
     history.push('/register/');
-  //  alert(`selected register`+k);
   }
 
   handleCourseClick(k){
@@ -73,49 +72,38 @@ class App extends Component {
     console.log("course clicked")
   }
 
-  loadCourseQuestions(){
-//    var self = this;
-  }
-
   loadBasicContractInfo(){
-    var self = this;
     this.evaluation.deployed().then((evalInstance) => {
-      this.evalInstance = evalInstance
-      this.evalInstance.owner().then((owner)=>{
-        if(self.state.account === owner) {
-          self.setState({isOwner: true})
-        } else{
-          self.setState({isOwner: false})
-          self.loadAvailableCourses()
-        }
-        self.setState({loading: false})
-      })
+      this.loadAvailableCourses(evalInstance)
     });
   }
 
-  loadAvailableCourses() {
-    this.evaluation.deployed().then((evalInstance) => {
-      this.evalInstance = evalInstance
-      this.evaluationEvents()
-      this.evalInstance.getAvailableCourses(this.state.account).then((myCourses) => {
-        for (var i = 0; i < myCourses.length; i++) {
-          this.evalInstance.registeredCourses(myCourses[i]).then((courseInfo) => {
-            const coursesAvailable = [...this.state.coursesAvailable]
-            console.log(coursesAvailable)
-            coursesAvailable.push({
-              id : courseInfo[0],
-              cKey: courseInfo[1],
-              lKey: courseInfo[2],
-              qNum: courseInfo[3]
-            });
-            this.setState({ coursesAvailable: coursesAvailable })
-          });
-        }
-      })
-    })
+  async loadAvailableCourses(evalInstance) {
+    var coursesAvailable = []
+    let contractOwner = await evalInstance.owner()
+    if(this.state.account === contractOwner) {
+      this.setState({isOwner: true, loading: false})
+      return
+    }
+
+    let myCourses = await evalInstance.getAvailableCourses(this.state.account)
+    for (var i = 0; i < myCourses.length; i++) {
+      let courseInfo = await evalInstance.registeredCourses(myCourses[i])
+      let courseName = await evalInstance.getCourseTitle(myCourses[i])
+      coursesAvailable.push({
+        id : courseInfo[0],
+        cKey: courseInfo[1],
+        lKey: courseInfo[2],
+        qNum: courseInfo[3],
+        cName: courseName,
+      });
+    }
+    this.evaluationEvents()
+    this.setState({ coursesAvailable: coursesAvailable, isOwner:false,
+      loading : false })
   }
 
-  evaluationEvents() {
+  async evaluationEvents() {
     this.evalInstance.evaluatedEvent({}, {
       fromBlock: 0,
       toBlock: 'latest'

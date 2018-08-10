@@ -187,7 +187,7 @@ contract Evaluation {
     }
   }
 
-  function checkRegistration(address _adr, uint _courseId) public onlyAdmin view returns (bool){
+  function checkRegistration(address _adr, uint _courseId) public view returns (bool){
     return studentCourseRegistrations[_adr][_courseId];
   }
 
