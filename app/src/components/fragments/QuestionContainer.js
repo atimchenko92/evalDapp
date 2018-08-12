@@ -6,8 +6,6 @@ import { FormGroup, FormControl,
 
 class QuestionContainer extends Component {
   render() {
-    console.log("Render: qContainer. \nProps:")
-    console.log(this.props)
     return(
         <span>
           <span>{this.props.qInfo.qText}</span>
@@ -26,11 +24,15 @@ class QuestionContainer extends Component {
               }
             </ToggleButtonGroup>
             :
-            <FormGroup controlId="formControlsTextarea">
+            <FormGroup controlId="formControlsTextarea"
+              validationState={this.props.handleValidationState()}>
               <ControlLabel>Give your opinion</ControlLabel>
               <FormControl componentClass="textarea"
+                value={this.props.qInfo.chosenAnswer}
                 placeholder="Max. 128 characters"
-                inputRef={this.props.handleAnswerTextual}/>
+                onChange={this.props.handleAnswerTextual}
+                //inputRef={this.props.handleAnswerTextual}
+                />
             </FormGroup>
           }
 

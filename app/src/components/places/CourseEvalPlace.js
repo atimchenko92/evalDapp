@@ -1,3 +1,4 @@
+'use strict';
 import React, { Component } from 'react'
 import history from '../../history'
 
@@ -42,13 +43,15 @@ class CourseEvalPlace extends Component {
     this.evaluation = contract(evaluation_artifacts)
     this.evaluation.setProvider(this.provider)
 
-    this.myRefs = {};
     this.handlePagerClick = this.handlePagerClick.bind(this);
     this.handleAnswerClick = this.handleAnswerClick.bind(this);
     this.handleAnswerTextual = this.handleAnswerTextual.bind(this);
+    this.handleValidationState = this.handleValidationState.bind(this);
     this.setState({currentCourse: args.match.params.number});
+  }
 
-    console.log(this.props)
+  static getMaxTextLength() {
+    return 128;
   }
 
   componentDidMount(){
@@ -98,13 +101,16 @@ class CourseEvalPlace extends Component {
         curQuestion = {qId: i, qText: qBody,
          isTextual: false, isFirst: (i === 1) ? true : false,
          isLast: (i === qMax.toNumber()) ? true : false,
-         answers: [], chosenAnswer: ""}
+         answers: [], chosenAnswer: "", isValidAnswer: false
+       }
 
         let maxAnswers = await evalInstance
           .getMaxAnswerForQuestionWrapper(courseToBeLoaded, i)
 
-        if(maxAnswers.toNumber() === 0)
+        if(maxAnswers.toNumber() === 0){
           curQuestion.isTextual = true
+          curQuestion.isValidAnswer = true
+        }
 
         //Load answers:
         for (var j = 1; j <= maxAnswers; j++){
@@ -121,13 +127,16 @@ class CourseEvalPlace extends Component {
   }
 
   isCourseReadyForEvaluation(){
-    return false;
+    const cQuest = this.state.courseQuestions
+      .find(question => question.isValidAnswer === false)
+
+    if(typeof cQuest == "undefined")
+      return true
+    else
+      return false
   }
 
   handlePagerClick (k){
-    if(this.state.curQuestion.isTextual === true)
-      this.preserveTextualAnswer()
-
     if(k==="next"){
       const resNext = this.state.courseQuestions.find(course => course.qId === (this.state.curQuestion.qId + 1))
       this.setState({ curQuestion: resNext })
@@ -141,29 +150,37 @@ class CourseEvalPlace extends Component {
     else return
   }
 
-  handleAnswerTextual (ref){
-    if(this.state.curQuestion.isTextual === true && ref !== null){
-      this.myRefs.textInput = ref
-      this.myRefs.textInput.value = this.state.curQuestion.chosenAnswer
-    }
-  }
-
-  preserveTextualAnswer (){
+  handleAnswerTextual (e){
     const qCopy = this.state.curQuestion
-    qCopy.chosenAnswer = this.myRefs.textInput.value
+    qCopy.chosenAnswer = e.target.value
     this.setState({curQuestion: qCopy})
   }
 
-  handleAnswerClick (k){
+  handleAnswerClick(k) {
     console.log(k + " is clicked")
     const qCopy = this.state.curQuestion
-    qCopy.chosenAnswer = k;
+    qCopy.chosenAnswer = k
+    qCopy.isValidAnswer = true
     this.setState({ curQuestion: qCopy })
   }
 
-  render() {
-    console.log("Rendering CourseEvalPlace. Course#:"+this.state.currentCourse)
+  handleValidationState() {
+    const length = this.state.curQuestion.chosenAnswer.length;
+    const qCopy = this.state.curQuestion
+    if (length <= CourseEvalPlace.getMaxTextLength()){
+      qCopy.isValidAnswer = true;
+      return 'success';
+    }
+    else if (length > CourseEvalPlace.getMaxTextLength()) {
+      qCopy.isValidAnswer = false;
+      return 'error';
+    }
+    return null;
+  }
 
+  render() {
+    const isRdyForEval = this.isCourseReadyForEvaluation()
+    
     if(this.props.match.params.number !== this.state.currentCourse)
       this.loadBasicCourseInfo(this.props.match.params.number)
 
@@ -176,10 +193,14 @@ class CourseEvalPlace extends Component {
               <QuestionContainer
                 qInfo={this.state.curQuestion}
                 currentCourse={this.state.currentCourse}
+                handleValidationState={this.handleValidationState.bind(this)}
                 handleAnswerClick={this.handleAnswerClick.bind(this)}
                 handleAnswerTextual={this.handleAnswerTextual.bind(this)}
                 handlePagerClick={this.handlePagerClick.bind(this)} />
-              <Button bsStyle="success">Evaluate the course</Button>
+              <Button bsStyle="success"
+                disabled={!isRdyForEval}>
+                Evaluate the course
+              </Button>
             </span>:
             <span>Sorry, you are not yet registered
             for this course evaluation</span>
