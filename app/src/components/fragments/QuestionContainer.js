@@ -8,7 +8,6 @@ class QuestionContainer extends Component {
   render() {
     console.log("Render: qContainer. \nProps:")
     console.log(this.props)
-    console.log(this.props.qInfo.chosenAnswer)
     return(
         <span>
           <span>{this.props.qInfo.qText}</span>
@@ -31,7 +30,7 @@ class QuestionContainer extends Component {
               <ControlLabel>Give your opinion</ControlLabel>
               <FormControl componentClass="textarea"
                 placeholder="Max. 128 characters"
-                inputRef={e => this.props.handleAnswerTextual(e)}/>
+                inputRef={this.props.handleAnswerTextual}/>
             </FormGroup>
           }
 

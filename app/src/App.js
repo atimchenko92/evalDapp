@@ -98,13 +98,13 @@ class App extends Component {
         cName: courseName,
       });
     }
-    this.evaluationEvents()
+    this.evaluationEvents(evalInstance)
     this.setState({ coursesAvailable: coursesAvailable, isOwner:false,
       loading : false })
   }
 
-  async evaluationEvents() {
-    this.evalInstance.evaluatedEvent({}, {
+  async evaluationEvents(evalInstance) {
+    evalInstance.evaluatedEvent({}, {
       fromBlock: 0,
       toBlock: 'latest'
     }).watch((error, event) => {

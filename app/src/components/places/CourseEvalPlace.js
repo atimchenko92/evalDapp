@@ -51,7 +51,7 @@ class CourseEvalPlace extends Component {
     console.log(this.props)
   }
 
-  componentWillMount(){
+  componentDidMount(){
     console.log("in course eval place")
     var self = this;
     window.web3.eth.getCoinbase(function(err, account) {
@@ -98,8 +98,7 @@ class CourseEvalPlace extends Component {
         curQuestion = {qId: i, qText: qBody,
          isTextual: false, isFirst: (i === 1) ? true : false,
          isLast: (i === qMax.toNumber()) ? true : false,
-         answers: [], chosenAnswer: ""
-        }
+         answers: [], chosenAnswer: ""}
 
         let maxAnswers = await evalInstance
           .getMaxAnswerForQuestionWrapper(courseToBeLoaded, i)
@@ -132,25 +131,24 @@ class CourseEvalPlace extends Component {
     if(k==="next"){
       const resNext = this.state.courseQuestions.find(course => course.qId === (this.state.curQuestion.qId + 1))
       this.setState({ curQuestion: resNext })
-      this.myRefs.textInput.value = resNext.chosenAnswer
       history.push('/course/'+this.state.currentCourse+'?qId='+ resNext.qId);
     }
     else if (k==="prev") {
       const resPrev = this.state.courseQuestions.find(course => course.qId === (this.state.curQuestion.qId - 1))
       this.setState({ curQuestion: resPrev })
-      this.myRefs.textInput.value = resPrev.chosenAnswer
       history.push('/course/'+this.state.currentCourse+'?qId='+ resPrev.qId);
     }
     else return
   }
 
-  handleAnswerTextual (e){
-    this.myRefs.textInput = e
-    console.log(e)
+  handleAnswerTextual (ref){
+    if(this.state.curQuestion.isTextual === true && ref !== null){
+      this.myRefs.textInput = ref
+      this.myRefs.textInput.value = this.state.curQuestion.chosenAnswer
+    }
   }
 
   preserveTextualAnswer (){
-    //TODO: acquire textual input either after pager or after "evaluate button"
     const qCopy = this.state.curQuestion
     qCopy.chosenAnswer = this.myRefs.textInput.value
     this.setState({curQuestion: qCopy})
@@ -165,12 +163,10 @@ class CourseEvalPlace extends Component {
 
   render() {
     console.log("Rendering CourseEvalPlace. Course#:"+this.state.currentCourse)
-    console.log("CourseEvPlace props")
-    console.log(this.state)
 
-    if(this.props.match.params.number !== this.state.currentCourse){
+    if(this.props.match.params.number !== this.state.currentCourse)
       this.loadBasicCourseInfo(this.props.match.params.number)
-    }
+
     return(
       <span>
         {!this.state.loading ?
