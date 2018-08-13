@@ -189,6 +189,9 @@ class CourseEvalPlace extends Component {
         uintAnswers.push(this.state.courseQuestions[i].chosenAnswer)
       }
     }
+    txtAnswers = txtAnswers.substr(2)
+    
+    console.log(txtAnswers)
     this.evaluation.deployed().then((evalInstance) => {
       this.handleEvaluation(evalInstance, uintAnswers, txtAnswers)
     })

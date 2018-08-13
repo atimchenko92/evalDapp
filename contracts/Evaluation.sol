@@ -210,11 +210,9 @@ contract Evaluation {
   }
 
   function getAvailableCourses(address _adr) public view returns (uint[] ){
-    //uint[] memory _resArr = new uint[](coursesCount);
     uint[] _resArr;
     for(uint i = 1; i <= coursesCount; i++)
       if(studentCourseRegistrations[_adr][i] == true)
-        //_resArr[j] = i;
         _resArr.push(i);
     return _resArr;
   }
@@ -226,5 +224,4 @@ contract Evaluation {
   function getRatingTextForValWrapper(uint _cId, uint _qId, uint _ansId) public view returns (string){
     return QuestionsLib.getRatingTextForVal(registeredCourses[_cId].questionsToEvaluate[_qId], _ansId);
   }
-
 }

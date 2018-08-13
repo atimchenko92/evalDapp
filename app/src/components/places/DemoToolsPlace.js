@@ -5,7 +5,6 @@ import { default as Web3} from 'web3'
 import { default as contract } from 'truffle-contract'
 import evaluation_artifacts from '../../contracts/Evaluation.json'
 
-// UI-Components
 class DemoToolsPlace extends Component {
   constructor(args){
     super(args);

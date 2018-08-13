@@ -66,7 +66,7 @@ class HomePlace extends Component {
   }
 
   async loadBasicInfo(evalInstance){
-
+    
     let contractOwner = await evalInstance.owner()
     if(this.state.account !== contractOwner)
       this.setState({isOwner: false})
@@ -132,8 +132,7 @@ class HomePlace extends Component {
             progTimeLeft = {this.progTimeLeft}
             handleTimeInput = {this.handleTimeInput.bind(this)}
             handleTimeIncrease = {this.handleTimeIncrease.bind(this)}
-            handleTimeDecrease = {this.handleTimeDecrease.bind(this)}/>
-        :
+            handleTimeDecrease = {this.handleTimeDecrease.bind(this)}/> :
           <span>Loading...</span>
         }
       </span>
