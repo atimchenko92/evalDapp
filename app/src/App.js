@@ -38,10 +38,11 @@ class App extends Component {
     this.evaluation = contract(evaluation_artifacts)
     this.evaluation.setProvider(this.provider)
 
-    //bind events
+    //bind methods
     this.evaluationEvents = this.evaluationEvents.bind(this)
     this.handleCourseClick = this.handleCourseClick.bind(this)
     this.handleRegisterForEvalClick = this.handleRegisterForEvalClick.bind(this)
+    this.handleDemoTools = this.handleDemoTools.bind(this)
   }
 
   componentWillMount(){
@@ -64,12 +65,15 @@ class App extends Component {
   }
 
   handleRegisterForEvalClick(){
-    history.push('/register/');
+    history.push('/register/')
   }
 
   handleCourseClick(k){
-    history.push('/course/'+k);
-    console.log("course clicked")
+    history.push('/course/'+k)
+  }
+
+  handleDemoTools(){
+    history.push('/demoTools/')
   }
 
   loadBasicContractInfo(){
@@ -121,6 +125,7 @@ class App extends Component {
           loading={this.state.loading}
           coursesAvailable={this.state.coursesAvailable}
           handleCourseClick={this.handleCourseClick.bind(this)}
+          handleDemoTools={this.handleDemoTools.bind(this)}
           handleRegisterForEvalClick={this.handleRegisterForEvalClick.bind(this)}/>
         <Main/>
       </div>

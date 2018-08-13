@@ -1,4 +1,3 @@
-'use strict';
 import React, { Component } from 'react'
 import history from '../../history'
 
@@ -47,6 +46,7 @@ class CourseEvalPlace extends Component {
     this.handleAnswerClick = this.handleAnswerClick.bind(this);
     this.handleAnswerTextual = this.handleAnswerTextual.bind(this);
     this.handleValidationState = this.handleValidationState.bind(this);
+    this.handleCourseEvaluation = this.handleCourseEvaluation.bind(this);
     this.setState({currentCourse: args.match.params.number});
   }
 
@@ -130,7 +130,7 @@ class CourseEvalPlace extends Component {
     const cQuest = this.state.courseQuestions
       .find(question => question.isValidAnswer === false)
 
-    if(typeof cQuest == "undefined")
+    if(typeof cQuest === "undefined")
       return true
     else
       return false
@@ -157,7 +157,6 @@ class CourseEvalPlace extends Component {
   }
 
   handleAnswerClick(k) {
-    console.log(k + " is clicked")
     const qCopy = this.state.curQuestion
     qCopy.chosenAnswer = k
     qCopy.isValidAnswer = true
@@ -178,9 +177,31 @@ class CourseEvalPlace extends Component {
     return null;
   }
 
+  handleCourseEvaluation() {
+    var uintAnswers = []
+    var txtAnswers = ""
+
+    for(var i = 0; i < this.state.courseQuestions.length; i++){
+      if (this.state.courseQuestions[i].isTextual){
+        txtAnswers = txtAnswers + "//" + this.state.courseQuestions[i].chosenAnswer
+      }
+      else{
+        uintAnswers.push(this.state.courseQuestions[i].chosenAnswer)
+      }
+    }
+    this.evaluation.deployed().then((evalInstance) => {
+      this.handleEvaluation(evalInstance, uintAnswers, txtAnswers)
+    })
+  }
+
+  async handleEvaluation(evalInstance, uintAnswers, txtAnswers){
+    await evalInstance.evaluateCourse(this.state.currentCourse, uintAnswers,
+      txtAnswers, {from: this.state.account})
+  }
+
   render() {
     const isRdyForEval = this.isCourseReadyForEvaluation()
-    
+
     if(this.props.match.params.number !== this.state.currentCourse)
       this.loadBasicCourseInfo(this.props.match.params.number)
 
@@ -196,8 +217,9 @@ class CourseEvalPlace extends Component {
                 handleValidationState={this.handleValidationState.bind(this)}
                 handleAnswerClick={this.handleAnswerClick.bind(this)}
                 handleAnswerTextual={this.handleAnswerTextual.bind(this)}
-                handlePagerClick={this.handlePagerClick.bind(this)} />
+                handlePagerClick={this.handlePagerClick.bind(this)}/>
               <Button bsStyle="success"
+                onClick={this.handleCourseEvaluation}
                 disabled={!isRdyForEval}>
                 Evaluate the course
               </Button>

@@ -7,6 +7,7 @@ import CourseEvalPlace from './places/CourseEvalPlace'
 import EvalRegisterPlace from './places/EvalRegisterPlace'
 import AboutPlace from './places/AboutPlace'
 import StatsPlace from './places/StatsPlace'
+import DemoToolsPlace from './places/DemoToolsPlace'
 
 class Main extends Component {
   render() {
@@ -18,6 +19,7 @@ class Main extends Component {
           <Route path='/register' component={EvalRegisterPlace}/>
           <Route path='/about' component={AboutPlace}/>
           <Route path='/stats' component={StatsPlace}/>
+          <Route path='/demoTools' component={DemoToolsPlace}/>
         </Switch>
       </main>
     );

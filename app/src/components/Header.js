@@ -25,6 +25,9 @@ class Header extends Component {
                   <MenuItem onSelect={() => this.props.handleRegisterForEvalClick()}>
                     Evaluation registration
                   </MenuItem>
+                  <MenuItem onSelect={() => this.props.handleDemoTools()}>
+                    Demo tools
+                  </MenuItem>
                 </NavDropdown>)
               : (<NavDropdown title="Available Courses" id="basic-nav-dropdown">
                   {this.props.coursesAvailable.map((course) => {

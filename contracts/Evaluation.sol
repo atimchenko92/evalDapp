@@ -20,7 +20,7 @@ contract Evaluation {
   string public semester;
   uint public amountEvaluated;
   uint public amountRegistered;
-  uint private testNow; //Test only
+  uint public testNow; //Test only
 
   struct Course {
     uint id;
@@ -191,11 +191,11 @@ contract Evaluation {
     return studentCourseRegistrations[_adr][_courseId];
   }
 
-  function increaseNowTime(uint timeInDays) public {
+  function increaseNowTime(uint timeInDays) onlyAdmin public {
     testNow += timeInDays * 1 days;
   }
 
-  function decreaseNowTime(uint timeInDays) public {
+  function decreaseNowTime(uint timeInDays) onlyAdmin public {
     testNow -= timeInDays * 1 days;
   }
 

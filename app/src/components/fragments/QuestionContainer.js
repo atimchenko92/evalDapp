@@ -30,9 +30,7 @@ class QuestionContainer extends Component {
               <FormControl componentClass="textarea"
                 value={this.props.qInfo.chosenAnswer}
                 placeholder="Max. 128 characters"
-                onChange={this.props.handleAnswerTextual}
-                //inputRef={this.props.handleAnswerTextual}
-                />
+                onChange={this.props.handleAnswerTextual}/>
             </FormGroup>
           }
 
