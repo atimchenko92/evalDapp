@@ -8,6 +8,7 @@ import evaluation_artifacts from '../../contracts/Evaluation.json'
 
 // Child Components
 import QuestionContainer from '../fragments/QuestionContainer'
+import CourseEvalResult from '../fragments/CourseEvalResult'
 
 // UI-Components
 import { Button } from 'react-bootstrap'
@@ -22,6 +23,7 @@ class CourseEvalPlace extends Component {
       account: '0x0',
       currentCourse: this.props.match.params.number,
       courseQuestions: [],
+      evalInfo: [],
       curQuestion: {}
     }
 
@@ -88,19 +90,30 @@ class CourseEvalPlace extends Component {
 
     let isAvailable = await evalInstance
       .checkRegistration(this.state.account, courseToBeLoaded)
+
     if(isAvailable === false){
       this.setState({ courseQuestions: [],
         curQuestion: {}, loading : false})
     } else {
+
+      let evalInfo = await evalInstance
+        .studentEvaluations(this.state.account, courseToBeLoaded)
+
+      if(evalInfo[1] === true){
+        this.prepareEvaluationResult(evalInstance, courseToBeLoaded)
+        return
+      }
+
       let courseInfo = await evalInstance.registeredCourses(courseToBeLoaded)
-      const qMax = courseInfo[3];
+      const qMax = courseInfo[3]
+
       //Load questions
-      for (var i = 1; i <= qMax; i++) {
+      for (var i = 0; i < qMax; i++) {
         let qBody = await evalInstance
           .getQuestionBodyByCourse(courseToBeLoaded, i)
-        curQuestion = {qId: i, qText: qBody,
-         isTextual: false, isFirst: (i === 1) ? true : false,
-         isLast: (i === qMax.toNumber()) ? true : false,
+        curQuestion = {qId: i+1, qText: qBody,
+         isTextual: false, isFirst: (i === 0) ? true : false,
+         isLast: (i === (qMax.toNumber() - 1)) ? true : false,
          answers: [], chosenAnswer: "", isValidAnswer: false
        }
 
@@ -122,6 +135,7 @@ class CourseEvalPlace extends Component {
       }
       this.setState({ courseQuestions: courseQuestions,
         curQuestion: courseQuestions[0], loading : false,
+        isEvaluated : false,
         isAvailable : true})
     }
   }
@@ -177,6 +191,28 @@ class CourseEvalPlace extends Component {
     return null;
   }
 
+//TODO:
+  async prepareEvaluationResult(evalInstance, courseToBeLoaded) {
+    var evalInfo = []
+    let courseInfo = await evalInstance.registeredCourses(courseToBeLoaded)
+    const qMax = courseInfo[3]
+
+    //Load questions
+    for (var i = 0; i < qMax; i++) {
+      let qBody = await evalInstance
+        .getQuestionBodyByCourse(courseToBeLoaded, i)
+
+      let savedAns = await evalInstance
+        .readEvaluation(this.state.account, courseToBeLoaded, i)
+
+      evalInfo.push({qId: i+1, qBody: qBody, qAnswer: savedAns})
+    }
+
+    this.setState({ courseQuestions: [],
+      evalInfo : evalInfo, curQuestion: {},
+      loading : false, isAvailable : true})
+  }
+
   handleCourseEvaluation() {
     var uintAnswers = []
     var txtAnswers = ""
@@ -190,8 +226,7 @@ class CourseEvalPlace extends Component {
       }
     }
     txtAnswers = txtAnswers.substr(2)
-    
-    console.log(txtAnswers)
+
     this.evaluation.deployed().then((evalInstance) => {
       this.handleEvaluation(evalInstance, uintAnswers, txtAnswers)
     })
@@ -204,6 +239,7 @@ class CourseEvalPlace extends Component {
 
   render() {
     const isRdyForEval = this.isCourseReadyForEvaluation()
+    const msgNotAvailable = 'Sorry, you are not yet registered for this course'
 
     if(this.props.match.params.number !== this.state.currentCourse)
       this.loadBasicCourseInfo(this.props.match.params.number)
@@ -214,21 +250,26 @@ class CourseEvalPlace extends Component {
           <span>
           {this.state.isAvailable ?
             <span>
-              <QuestionContainer
-                qInfo={this.state.curQuestion}
-                currentCourse={this.state.currentCourse}
-                handleValidationState={this.handleValidationState.bind(this)}
-                handleAnswerClick={this.handleAnswerClick.bind(this)}
-                handleAnswerTextual={this.handleAnswerTextual.bind(this)}
-                handlePagerClick={this.handlePagerClick.bind(this)}/>
-              <Button bsStyle="success"
-                onClick={this.handleCourseEvaluation}
-                disabled={!isRdyForEval}>
-                Evaluate the course
-              </Button>
-            </span>:
-            <span>Sorry, you are not yet registered
-            for this course evaluation</span>
+            {this.state.isEvaluated ?
+              <CourseEvalResult evalInfo = {this.state.evalInfo}/> :
+              <span>
+                <QuestionContainer
+                  qInfo={this.state.curQuestion}
+                  currentCourse={this.state.currentCourse}
+                  handleValidationState={this.handleValidationState.bind(this)}
+                  handleAnswerClick={this.handleAnswerClick.bind(this)}
+                  handleAnswerTextual={this.handleAnswerTextual.bind(this)}
+                  handlePagerClick={this.handlePagerClick.bind(this)}/>
+                <Button bsStyle="success"
+                  onClick={this.handleCourseEvaluation}
+                  disabled={!isRdyForEval}>
+                  Evaluate the course
+                </Button>
+              </span>
+            }
+            </span>
+            :
+            <span>{msgNotAvailable}</span>
           }
           </span>:
           <span>Loading...</span>

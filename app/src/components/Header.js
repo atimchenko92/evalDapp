@@ -19,30 +19,42 @@ class Header extends Component {
         </Navbar.Header>
         <Navbar.Collapse>
         {!this.props.loading
-          ? (<Nav>
+          ? (<span>
             {this.props.isOwner
-              ? (<NavDropdown title="Admin Tools" id="basic-nav-dropdown">
-                  <MenuItem onSelect={() => this.props.handleRegisterForEvalClick()}>
-                    Evaluation registration
-                  </MenuItem>
-                  <MenuItem onSelect={() => this.props.handleDemoTools()}>
-                    Demo tools
-                  </MenuItem>
-                </NavDropdown>)
-              : (<NavDropdown title="Available Courses" id="basic-nav-dropdown">
-                  {this.props.coursesAvailable.map((course) => {
-                    return(
-                      <MenuItem onSelect={ k => this.props.handleCourseClick(k)}
-                        eventKey={course.id.toNumber()}>{course.cName}
-                        [id={course.id.toNumber()}]
-                      </MenuItem>
-                    )
-                  })}
-                  <MenuItem divider />
-                    <MenuItem>Already evaluated</MenuItem>
-                </NavDropdown>)
+              ? (<Nav>
+                  <NavDropdown title="Admin Tools" id="basic-nav-dropdown">
+                    <MenuItem
+                      onSelect={() => this.props.handleRegisterForEvalClick()}>
+                      Evaluation registration
+                    </MenuItem>
+                    <MenuItem onSelect={() => this.props.handleDemoTools()}>
+                      Demo tools
+                    </MenuItem>
+                  </NavDropdown>
+                </Nav>)
+              : (<Nav>
+                  <NavDropdown title="Available Courses"
+                    id="basic-nav-dropdown">
+                    {this.props.coursesAvailable.map((course) => {
+                      return(
+                        <MenuItem
+                          onSelect={ k => this.props.handleCourseClick(k)}
+                          eventKey={course.id.toNumber()}>
+                          {course.cName}
+                          [id={course.id.toNumber()}]
+                          {course.isEvaluated === true ? ' ✔' : ''}
+                        </MenuItem>
+                      )
+                    })}
+                    {this.props.coursesAvailable.length === 0 ?
+                      <MenuItem className='disabled'>
+                        No courses yet...
+                      </MenuItem> :
+                      <span/>}
+                  </NavDropdown>
+                </Nav>)
             }
-            </Nav>)
+            </span>)
           : (<div>Loading...</div>)
           }
           <Navbar.Text>

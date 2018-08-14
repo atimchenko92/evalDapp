@@ -92,14 +92,19 @@ class App extends Component {
 
     let myCourses = await evalInstance.getAvailableCourses(this.state.account)
     for (var i = 0; i < myCourses.length; i++) {
+
       let courseInfo = await evalInstance.registeredCourses(myCourses[i])
       let courseName = await evalInstance.getCourseTitle(myCourses[i])
+      let evalInfo = await evalInstance
+        .studentEvaluations(this.state.account, myCourses[i])
+
       coursesAvailable.push({
         id : courseInfo[0],
         cKey: courseInfo[1],
         lKey: courseInfo[2],
         qNum: courseInfo[3],
         cName: courseName,
+        isEvaluated: evalInfo[1]
       });
     }
     this.evaluationEvents(evalInstance)
