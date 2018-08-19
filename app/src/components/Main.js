@@ -17,7 +17,7 @@ class Main extends Component {
           <Route path='/course/:number' component={CourseEvalPlace}/>
           <Route path='/register' component={EvalRegisterPlace}/>
           <Route path='/about' component={AboutPlace}/>
-          <Route path='/stats' component={StatsPlace}/>
+          <Route path='/stats' component={StatsPlace}/> 
         </Switch>
       </main>
     );

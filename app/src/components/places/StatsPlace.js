@@ -5,6 +5,12 @@ import { default as Web3} from 'web3'
 import { default as contract } from 'truffle-contract'
 import evaluation_artifacts from '../../contracts/Evaluation.json'
 
+// Child Components
+import CourseStatPanel from '../fragments/CourseStatPanel'
+
+// UI-Components
+import { Table, Button } from 'react-bootstrap'
+
 class StatsPlace extends Component {
   constructor(args){
     super(args);
@@ -12,7 +18,9 @@ class StatsPlace extends Component {
       loading: true,
       account: '0x0',
       isOwner: false,
-      timeState: ""
+      courses: [],
+      chosenCourse: {},
+      evalInfo: []
     }
 
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
@@ -60,22 +68,112 @@ class StatsPlace extends Component {
   }
 
   async loadBasicStatInfo(evalInstance){
-    //Example
-    const courseToCheck = 3
-    let cInfo = await evalInstance.registeredCourses(courseToCheck)
-    const qNumber = cInfo[3]
-    console.log("Stats of course #"+courseToCheck)
-    for(var i = 0; i < qNumber; i++){
-      let savedAns = await evalInstance
-        .readEvaluation(this.state.account, courseToCheck, i)
-      console.log(`Answer to question #${i}: ${savedAns}\n`)
+    var statCourses = []
+
+    if(!this.state.isOwner){
+      let myCourses = await evalInstance.getAvailableCourses(this.state.account)
+      for (var i = 0; i < myCourses.length; i++) {
+        let courseInfo = await evalInstance.registeredCourses(myCourses[i])
+        let courseName = await evalInstance.getCourseTitle(myCourses[i])
+        let lecName = await evalInstance.getCourseLecturerName(myCourses[i])
+        let ratio = (courseInfo[4].toNumber() === 0) ? 0
+          : (courseInfo[5].toNumber() / courseInfo[4].toNumber())
+        let evalInfo = await evalInstance
+          .studentEvaluations(this.state.account, myCourses[i])
+        statCourses.push({
+          cId : myCourses[i].toNumber(),
+          cTitle: courseName,
+          cLec: lecName,
+          cReg: courseInfo[4].toNumber(),
+          cEval: courseInfo[5].toNumber(),
+          cRatio: ratio,
+          isEvaluated: evalInfo[1]
+        })
+      }
     }
+    else{
+      let coursesCount = await evalInstance.coursesCount()
+      for(i = 1; i <= coursesCount.toNumber(); i++){
+        let courseInfo = await evalInstance.registeredCourses(i)
+        let lecName = await evalInstance.getCourseLecturerName(i)
+        let courseName = await evalInstance.getCourseTitle(i)
+        let ratio = (courseInfo[4].toNumber() === 0) ? 0
+          : (courseInfo[5].toNumber() / courseInfo[4].toNumber())
+        statCourses.push({
+          cId : i,
+          cTitle: courseName,
+          cLec: lecName,
+          cReg: courseInfo[4].toNumber(),
+          cEval: courseInfo[5].toNumber(),
+          cRatio: ratio
+        })
+      }
+    }
+
+    this.setState({ courses: statCourses, loading : false})
   }
 
   render() {
     return(
-      <span>Hello Stats</span>
-    );
+      <span>
+        {!this.state.loading ?
+         <span>
+          <Table striped bordered condensed hover>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Course</th>
+                <th>Lecturer</th>
+                <th>Number of registrations</th>
+                <th>Number of evaluations</th>
+                <th>Evaluation ratio</th>
+                {!this.state.isOwner ?
+                  <th>Evaluation status</th>:
+                  <span/>
+                }
+                <th>Numerical evaluations</th>
+                <th>Textual response</th>
+              </tr>
+            </thead>
+            <tbody>
+            {this.state.courses.map((course) => {
+              return(
+                <tr key={course.cId}>
+                  <td>{course.cId}</td>
+                  <td>{course.cTitle}</td>
+                  <td>{course.cLec}</td>
+                  <td>{course.cReg}</td>
+                  <td>{course.cEval}</td>
+                  <td>
+                  {new Intl.NumberFormat('en-GB', {
+                     style: 'percent',
+                     minimumFractionDigits: 0,
+                     maximumFractionDigits: 1
+                   }).format(course.cRatio)}
+                  </td>
+                  {!this.state.isOwner ?
+                    <td>{course.isEvaluated ? 'evaluated' : 'not evaluated'}</td>:
+                    <span/>
+                  }
+                  <td>
+                    <Button bsStyle="primary">Show details</Button>
+                  </td>
+                  <td>
+                    <Button bsStyle="info">Show details</Button>
+                  </td>
+                </tr>
+              )
+            })}
+            </tbody>
+          </Table>
+          <CourseStatPanel
+            currentCourse={this.state.chosenCourse}
+            evalInfo={this.state.evalInfo}
+            isNumericalEvs={true}/>
+        </span>:
+        <span>Loading ...</span>}
+      </span>
+    )
   }
 }
 

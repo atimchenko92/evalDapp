@@ -17,7 +17,7 @@ class CourseEvalResult extends Component {
         <tbody>
         {this.props.evalInfo.map((ev) => {
           return(
-            <tr>
+            <tr key={ev.qId}>
               <td>{ev.qId}</td>
               <td>{ev.qBody}</td>
               <td>{ev.qAnswer}</td>

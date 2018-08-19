@@ -18,23 +18,25 @@ contract Evaluation {
   uint public evalStartTimestamp;
   uint public evalEndTimestamp;
   string public semester;
-  uint public amountEvaluated;
-  uint public amountRegistered;
-  uint public testNow; //Test only
+  uint public testNow; //Demo only
 
   struct Course {
     uint id;
     HSKALib.Courses courseKey;
     HSKALib.Lecturers lecturerKey;
     uint numberOfQuestions;
+    uint numberOfRegistrations;
+    uint numberOfEvaluations;
     mapping (uint => QuestionsLib.QuestionArchetype) questionsToEvaluate;
+    mapping (uint => address) accountRegistrations;
+    mapping (uint => address) accountEvaluations;
   }
 
   struct EvaluatedCourse{
     uint courseId;
     bool isEvaluated;
     mapping (uint => uint) answersToUIntQuestions;
-    mapping (uint => string) answersToTxtQuestions; //Question id -> answer value
+    mapping (uint => string) answersToTxtQuestions;
   }
 
   modifier onlyAdmin(){
@@ -78,15 +80,15 @@ contract Evaluation {
     registerCourseForEvaluation(HSKALib.Courses.course3, HSKALib.Lecturers.prof2);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q4);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q8);
-    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q11);
-    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q11);
-    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q11);
+    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q7);
+    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q5);
+    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q6);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q11);
 
     registerCourseForEvaluation(HSKALib.Courses.course4, HSKALib.Lecturers.prof3);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q4);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q5);
-    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q7);
+    assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q8);
     assignQuestionToCourse(coursesCount, QuestionsLib.QuestionArchetype.q9);
   }
 
@@ -96,7 +98,9 @@ contract Evaluation {
        id: coursesCount,
        courseKey: _courseKey,
        lecturerKey: _lecturerKey,
-       numberOfQuestions: 0
+       numberOfQuestions: 0,
+       numberOfRegistrations: 0,
+       numberOfEvaluations: 0
      });
 
     return true;
@@ -145,7 +149,9 @@ contract Evaluation {
     }
 
     studentEvaluations[msg.sender][_courseId].isEvaluated = true;
-    amountEvaluated++;
+
+    registeredCourses[_courseId]
+      .accountEvaluations[++registeredCourses[_courseId].numberOfEvaluations] = msg.sender;
     emit evaluatedEvent(_courseId);
     return true;
   }
@@ -155,7 +161,8 @@ contract Evaluation {
     require(registeredCourses[_courseId].id != 0, "The course is not registered");
     _account.transfer(msg.value);
     studentCourseRegistrations[_account][_courseId] = true;
-    amountRegistered++;
+    registeredCourses[_courseId]
+      .accountRegistrations[++registeredCourses[_courseId].numberOfRegistrations] = _account;
   }
 
   function getCourseTitle(uint _cId) public view returns (string) {
