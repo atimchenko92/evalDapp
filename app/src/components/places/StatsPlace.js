@@ -19,7 +19,7 @@ class StatsPlace extends Component {
       account: '0x0',
       isOwner: false,
       courses: [],
-      chosenCourse: {},
+      courseInfo: {},
       evalInfo: []
     }
 
@@ -37,6 +37,11 @@ class StatsPlace extends Component {
 
     this.evaluation = contract(evaluation_artifacts)
     this.evaluation.setProvider(this.provider)
+
+    this.handleTextualDetailsClick
+      = this.handleTextualDetailsClick.bind(this)
+    this.handleNumericalDetailsClick
+      = this.handleNumericalDetailsClick.bind(this)
   }
 
   componentDidMount(){
@@ -87,7 +92,9 @@ class StatsPlace extends Component {
           cReg: courseInfo[4].toNumber(),
           cEval: courseInfo[5].toNumber(),
           cRatio: ratio,
-          isEvaluated: evalInfo[1]
+          isEvaluated: evalInfo[1],
+          hasNumerical: courseInfo[6],
+          hasTextual: courseInfo[7]
         })
       }
     }
@@ -105,15 +112,39 @@ class StatsPlace extends Component {
           cLec: lecName,
           cReg: courseInfo[4].toNumber(),
           cEval: courseInfo[5].toNumber(),
-          cRatio: ratio
+          cRatio: ratio,
+          hasNumerical: courseInfo[6],
+          hasTextual: courseInfo[7]
         })
       }
     }
 
-    this.setState({ courses: statCourses, loading : false})
+    this.setState({ courses: statCourses, chosenCourse: {}, loading : false})
+  }
+
+  handleNumericalDetailsClick(e) {
+    console.log(e.target.id)
+    //TODO: implement load logic
+
+    this.setState({chosenCourse: {}, evalInfo: []})
+  }
+
+  handleTextualDetailsClick(e) {
+    const cId = e.target.id
+    this.evaluation.deployed().then( async(evalInstance) => {
+//      let cInfo = await evalInstance.registeredCourses(cId)
+      let acc = await evalInstance.getEvalAccountsByCourse(cId)
+    })
+    this.setState({chosenCourse: {}, evalInfo: []})
   }
 
   render() {
+    let evStatus
+
+    if(!this.state.isOwner){
+      evStatus = <th>Evaluation status</th>
+    }
+
     return(
       <span>
         {!this.state.loading ?
@@ -127,10 +158,7 @@ class StatsPlace extends Component {
                 <th>Number of registrations</th>
                 <th>Number of evaluations</th>
                 <th>Evaluation ratio</th>
-                {!this.state.isOwner ?
-                  <th>Evaluation status</th>:
-                  <span/>
-                }
+                {evStatus}
                 <th>Numerical evaluations</th>
                 <th>Textual response</th>
               </tr>
@@ -152,14 +180,25 @@ class StatsPlace extends Component {
                    }).format(course.cRatio)}
                   </td>
                   {!this.state.isOwner ?
-                    <td>{course.isEvaluated ? 'evaluated' : 'not evaluated'}</td>:
-                    <span/>
+                    <td>{course.isEvaluated ? 'evaluated' : 'not evaluated'}
+                    </td> :
+                    null
                   }
                   <td>
-                    <Button bsStyle="primary">Show details</Button>
+                    <Button bsStyle="primary"
+                      id={course.cId}
+                      disabled={!course.hasNumerical}
+                      onClick={this.handleNumericalDetailsClick}>
+                      Show details
+                    </Button>
                   </td>
                   <td>
-                    <Button bsStyle="info">Show details</Button>
+                    <Button bsStyle="info"
+                      id={course.cId}
+                      disabled={!course.hasTextual}
+                      onClick={this.handleTextualDetailsClick}>
+                      Show details
+                    </Button>
                   </td>
                 </tr>
               )
@@ -167,9 +206,8 @@ class StatsPlace extends Component {
             </tbody>
           </Table>
           <CourseStatPanel
-            currentCourse={this.state.chosenCourse}
-            evalInfo={this.state.evalInfo}
-            isNumericalEvs={true}/>
+            chosenCourse={this.state.chosenCourse}
+            evalInfo={this.state.evalInfo}/>
         </span>:
         <span>Loading ...</span>}
       </span>

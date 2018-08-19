@@ -42,7 +42,7 @@ class PhaseIndicator extends Component {
                 onClick={this.props.handleTimeDecrease}>Decrease time</Button>
             </ButtonToolbar>
           </span>
-          :<span></span>}
+          :null}
       </span>
     );
   }

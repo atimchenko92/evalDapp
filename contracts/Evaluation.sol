@@ -27,6 +27,8 @@ contract Evaluation {
     uint numberOfQuestions;
     uint numberOfRegistrations;
     uint numberOfEvaluations;
+    bool hasNumerical;
+    bool hasTextual;
     mapping (uint => QuestionsLib.QuestionArchetype) questionsToEvaluate;
     mapping (uint => address) accountRegistrations;
     mapping (uint => address) accountEvaluations;
@@ -100,7 +102,9 @@ contract Evaluation {
        lecturerKey: _lecturerKey,
        numberOfQuestions: 0,
        numberOfRegistrations: 0,
-       numberOfEvaluations: 0
+       numberOfEvaluations: 0,
+       hasNumerical: false,
+       hasTextual: false
      });
 
     return true;
@@ -110,6 +114,10 @@ contract Evaluation {
      Course storage _course = registeredCourses[_courseId];
     _course.questionsToEvaluate[_course.numberOfQuestions] = _qarch;
     _course.numberOfQuestions++;
+    if(QuestionsLib.isTextTypedInput(_qarch))
+      _course.hasTextual = true;
+    else
+      _course.hasNumerical = true;
 
     return true;
   }
@@ -222,6 +230,20 @@ contract Evaluation {
       if(studentCourseRegistrations[_adr][i] == true)
         _resArr.push(i);
     return _resArr;
+  }
+
+  function getRegAccountsByCourse(uint _courseId) public view returns(address[]) {
+    address[] _adresses;
+    for(uint i = 1; i <= registeredCourses[_courseId].numberOfRegistrations; i++)
+      _adresses.push(registeredCourses[_courseId].accountRegistrations[i]);
+    return _adresses;
+  }
+
+  function getEvalAccountsByCourse(uint _courseId) public view returns(address[]) {
+    address[] _adresses;
+    for(uint i = 1; i <= registeredCourses[_courseId].numberOfEvaluations; i++)
+      _adresses.push(registeredCourses[_courseId].accountEvaluations[i]);
+    return _adresses;
   }
 
   function getMaxAnswerForQuestionWrapper(uint _cId, uint _qId) public view returns (uint){
