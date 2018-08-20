@@ -20,7 +20,7 @@ class EvalRegisterForm extends Component {
             placeholder="Select course...">
             {this.props.allCourses.map((course) => {
               return(
-                <option value={course.id.toNumber()}>
+                <option key={course.id.toNumber()} value={course.id.toNumber()}>
                 {course.cName}[id={course.id.toNumber()}]
                 </option>
               )

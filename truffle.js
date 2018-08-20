@@ -7,9 +7,10 @@ module.exports = {
     development: {
       host: "127.0.0.1",
       port: 8545,
-       gas: 4712388,          //4Mwei
+       gas: 5012388,          //4Mwei
        gasPrice: 20000000000, //20Gwei
       network_id: "*" // Match any network id
     }
   }
 };
+//4712388

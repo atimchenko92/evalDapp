@@ -191,6 +191,7 @@ class CourseEvalPlace extends Component {
 
   async prepareEvaluationResult(evalInstance, courseToBeLoaded) {
     var evalInfo = []
+    var txtAns
     let courseInfo = await evalInstance.registeredCourses(courseToBeLoaded)
     const qMax = courseInfo[3]
 
@@ -202,7 +203,16 @@ class CourseEvalPlace extends Component {
       let savedAns = await evalInstance
         .readEvaluation(this.state.account, courseToBeLoaded, i)
 
-      evalInfo.push({qId: i+1, qBody: qBody, qAnswer: savedAns})
+      if(savedAns[1]){
+        txtAns = await evalInstance
+          .getRatingTextForValWrapper(courseToBeLoaded, i, savedAns[0])
+      }
+      else {
+        txtAns = ""
+      }
+
+      evalInfo.push({qId: i+1, qBody: qBody,
+        qAnswer: savedAns[0], qTxtAnswer: txtAns})
     }
 
     this.setState({ courseQuestions: [],

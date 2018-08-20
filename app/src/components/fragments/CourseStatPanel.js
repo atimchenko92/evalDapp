@@ -6,16 +6,15 @@ import { Table, Panel } from 'react-bootstrap'
 class CourseStatPanel extends Component {
   render() {
     var panelTitle
-    const {courseInfo} = this.props.chosenCourse
 
-    if(courseInfo === undefined){
+    if(this.props.chosenCourse.courseName === undefined){
       panelTitle = "Detailed statistics"
     }
     else{
-      var titleAfter = (this.props.courseInfo.isNumericalEvs ?
+      var titleAfter = (this.props.chosenCourse.isNumericalEvs ?
         'Numerical evaluations' :
         'Textual response')
-      panelTitle = `${courseInfo.courseName} : ${titleAfter}`
+      panelTitle = `${this.props.chosenCourse.courseName} : ${titleAfter}`
     }
 
     return(
@@ -24,7 +23,7 @@ class CourseStatPanel extends Component {
           <Panel.Title componentClass="h3">{panelTitle}</Panel.Title>
         </Panel.Heading>
         <Panel.Body>
-        {courseInfo === undefined ?
+        {this.props.chosenCourse.courseName === undefined ?
           <span>Nothing to do here</span>
          :
          <Table striped bordered condensed hover>
@@ -38,10 +37,10 @@ class CourseStatPanel extends Component {
            <tbody>
            {this.props.evalInfo.map((ev) => {
              return(
-               <tr>
+               <tr key={ev.qId}>
                  <td>{ev.qId}</td>
                  <td>{ev.qBody}</td>
-                 <td>0</td>
+                 <td>{ev.mVal}</td>
                </tr>
              )
            })}

@@ -122,20 +122,62 @@ class StatsPlace extends Component {
     this.setState({ courses: statCourses, chosenCourse: {}, loading : false})
   }
 
-  handleNumericalDetailsClick(e) {
-    console.log(e.target.id)
-    //TODO: implement load logic
-
-    this.setState({chosenCourse: {}, evalInfo: []})
-  }
-
   handleTextualDetailsClick(e) {
     const cId = e.target.id
     this.evaluation.deployed().then( async(evalInstance) => {
-//      let cInfo = await evalInstance.registeredCourses(cId)
-      let acc = await evalInstance.getEvalAccountsByCourse(cId)
+      let accs = await evalInstance.getEvalAccountsByCourse(cId)
+      for(var i = 0; i < accs.length; i++){
+
+      }
     })
     this.setState({chosenCourse: {}, evalInfo: []})
+  }
+
+  handleNumericalDetailsClick(e) {
+    var evalInfo = []
+    var chosenCourse = {}
+
+    const cId = parseInt(e.target.id, 10)
+    var self = this
+    this.evaluation.deployed().then( async(evalInstance) => {
+      let accs = await evalInstance.getEvalAccountsByCourse(cId)
+      let courseInfo = await evalInstance.registeredCourses(cId)
+      const qMax = courseInfo[3]
+
+      const clickedCourse = self.state.courses
+        .find(course => course.cId === cId)
+
+      chosenCourse = {isNumericalEvs: true,
+        courseName: clickedCourse.cTitle}
+
+      // Load up question bodies
+      for(var i = 0; i < qMax; i++){
+        let isTextual = await evalInstance.isTextualQuestion(cId, i)
+        if(!isTextual){
+          let qBody = await evalInstance.getQuestionBodyByCourse(cId, i)
+
+          var tmpVal = 0
+          var ignoredAccs = 0
+          var partipAccs = accs.length
+          //Loop through accounts
+          for(var j = 0; j < accs.length; j++){
+            let cEval = await evalInstance.readEvaluation(accs[j], cId, i)
+            if(parseInt(cEval[0], 10) === 6)
+              ignoredAccs++;
+            else
+              tmpVal += parseInt(cEval[0], 10)
+          }
+
+          partipAccs -= ignoredAccs
+
+          if(partipAccs !== 0 )
+            tmpVal /= partipAccs
+
+          evalInfo.push({qId: i+1, qBody: qBody, mVal: tmpVal})
+        }
+      }
+      this.setState({chosenCourse: chosenCourse, evalInfo: evalInfo})
+    })
   }
 
   render() {

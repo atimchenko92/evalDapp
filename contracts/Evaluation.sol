@@ -184,11 +184,17 @@ contract Evaluation {
   function getQuestionBodyByCourse(uint _cId, uint _qId) public view returns (string) {
     return QuestionsLib.getQuestionBody(registeredCourses[_cId].questionsToEvaluate[_qId]);
   }
+  // string -> answer
+  // bool -> true, if the answer is integer
+  function readEvaluation(address _account, uint _courseId, uint _qId) public view returns(string, bool){
+    if(isTextualQuestion(_courseId, _qId))
+      return (studentEvaluations[_account][_courseId].answersToTxtQuestions[_qId], false);
+    return (Utils.uintToString(studentEvaluations[_account][_courseId].answersToUIntQuestions[_qId]), true);
+  }
 
-  function readEvaluation(address _account, uint _courseId, uint _qId) public view returns(string){
-    if(QuestionsLib.isTextTypedInput(registeredCourses[_courseId].questionsToEvaluate[_qId]))
-      return studentEvaluations[_account][_courseId].answersToTxtQuestions[_qId];
-    return Utils.uintToString(studentEvaluations[_account][_courseId].answersToUIntQuestions[_qId]);
+  function isTextualQuestion(uint _courseId, uint _qId) public view returns(bool){
+    return QuestionsLib.isTextTypedInput(
+      registeredCourses[_courseId].questionsToEvaluate[_qId]);
   }
 
   function isCourseEvaluatedByAccount(address _account, uint _courseId) public view returns(bool){

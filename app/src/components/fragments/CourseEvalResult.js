@@ -20,7 +20,10 @@ class CourseEvalResult extends Component {
             <tr key={ev.qId}>
               <td>{ev.qId}</td>
               <td>{ev.qBody}</td>
-              <td>{ev.qAnswer}</td>
+              {ev.qTxtAnswer === "" ?
+                <td>{ev.qAnswer}</td> :
+                <td>{ev.qAnswer} ({ev.qTxtAnswer})</td>
+              }
             </tr>
           )
         })}
