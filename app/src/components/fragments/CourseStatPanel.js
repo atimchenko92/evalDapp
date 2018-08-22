@@ -1,11 +1,22 @@
 import React, { Component } from 'react'
 
 // UI-Components
-import { Table, Panel } from 'react-bootstrap'
+import { Table, Panel, Alert } from 'react-bootstrap'
 
 class CourseStatPanel extends Component {
   render() {
     var panelTitle
+    var emptyBodyElem = null
+
+    if(!this.props.isAccessible){
+      emptyBodyElem = <Alert bsStyle="warning">
+        <strong>Hi there!</strong>
+         The detailed statistics will be available after the end of evaluation
+        </Alert>
+    }
+    else {
+      emptyBodyElem = <span>Nothing to do here</span>
+    }
 
     if(this.props.chosenCourse.courseName === undefined){
       panelTitle = "Detailed statistics"
@@ -24,7 +35,7 @@ class CourseStatPanel extends Component {
         </Panel.Heading>
         <Panel.Body>
         {this.props.chosenCourse.courseName === undefined ?
-          <span>Nothing to do here</span>
+          <span>{emptyBodyElem}</span>
          :
          <Table striped bordered condensed hover>
            <thead>

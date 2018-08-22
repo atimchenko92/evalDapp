@@ -16,6 +16,7 @@ class StatsPlace extends Component {
     super(args);
     this.state = {
       loading: true,
+      isAccessible: false,
       account: '0x0',
       isOwner: false,
       courses: [],
@@ -74,8 +75,11 @@ class StatsPlace extends Component {
 
   async loadBasicStatInfo(evalInstance){
     var statCourses = []
-
+    var isAccessible = false
     if(!this.state.isOwner){
+      let nowTimestamp = await evalInstance.testNow()
+      let evalEndTimestamp = await evalInstance.evalEndTimestamp()
+      isAccessible = (evalEndTimestamp - nowTimestamp) >= 0 ? false : true
       let myCourses = await evalInstance.getAvailableCourses(this.state.account)
       for (var i = 0; i < myCourses.length; i++) {
         let courseInfo = await evalInstance.registeredCourses(myCourses[i])
@@ -99,6 +103,7 @@ class StatsPlace extends Component {
       }
     }
     else{
+      isAccessible = true
       let coursesCount = await evalInstance.coursesCount()
       for(i = 1; i <= coursesCount.toNumber(); i++){
         let courseInfo = await evalInstance.registeredCourses(i)
@@ -119,7 +124,8 @@ class StatsPlace extends Component {
       }
     }
 
-    this.setState({ courses: statCourses, chosenCourse: {}, loading : false})
+    this.setState({ courses: statCourses, chosenCourse: {},
+                    isAccessible: isAccessible, loading : false})
   }
 
   handleTextualDetailsClick(e) {
@@ -229,7 +235,7 @@ class StatsPlace extends Component {
                   <td>
                     <Button bsStyle="primary"
                       id={course.cId}
-                      disabled={!course.hasNumerical}
+                      disabled={!course.hasNumerical || !this.state.isAccessible}
                       onClick={this.handleNumericalDetailsClick}>
                       Show details
                     </Button>
@@ -237,7 +243,7 @@ class StatsPlace extends Component {
                   <td>
                     <Button bsStyle="info"
                       id={course.cId}
-                      disabled={!course.hasTextual}
+                      disabled={!course.hasTextual || !this.state.isAccessible}
                       onClick={this.handleTextualDetailsClick}>
                       Show details
                     </Button>
@@ -248,6 +254,7 @@ class StatsPlace extends Component {
             </tbody>
           </Table>
           <CourseStatPanel
+            isAccessible={this.state.isOwner || this.state.isAccessible}
             chosenCourse={this.state.chosenCourse}
             evalInfo={this.state.evalInfo}/>
         </span>:

@@ -56,6 +56,11 @@ contract Evaluation {
     _;
   }
 
+  modifier afterEvaluationInterval(){
+    require(testNow >= evalEndTimestamp, "Not in post-evaluation interval");
+    _;
+  }
+
   event evaluatedEvent(
     uint indexed _courseId
   );

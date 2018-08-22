@@ -32,6 +32,8 @@ class HomePlace extends Component {
 
     this.timeInput = 0
 
+    this.generalInfo = {}
+
     this.prepareInterval = 0
     this.evalInterval = 0
     this.progTimeLeft = 0
@@ -66,7 +68,7 @@ class HomePlace extends Component {
   }
 
   async loadBasicInfo(evalInstance){
-    
+
     let contractOwner = await evalInstance.owner()
     if(this.state.account !== contractOwner)
       this.setState({isOwner: false})
@@ -74,6 +76,7 @@ class HomePlace extends Component {
       this.setState({isOwner: true})
 
     //Load up things
+    let semester       = await evalInstance.semester()
     let initTimestamp  = await evalInstance.evalInitTimestamp()
     let startTimestamp = await evalInstance.evalStartTimestamp()
     let endTimestamp   = await evalInstance.evalEndTimestamp()
@@ -90,17 +93,24 @@ class HomePlace extends Component {
     this.evalInterval = Math.ceil(
       Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24))
 
+    this.generalInfo = {semester: semester, initDate: initDate,
+      startDate: startDate, endDate: endDate, testNowDate: testNowDate,
+      prepareInterval: this.prepareInterval, evalInterval: this.evalInterval}
+
     if(startDate.getTime() - testNowDate.getTime() >= 0){
       this.progTimeLeft = Math.ceil(
         Math.abs(testNowDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24))
       this.progPercent = 100 - Math.ceil((this.progTimeLeft * 100) / this.prepareInterval)
       this.setState({timeState: "registr", loading: false})
     }
-    else{
+    else if(endDate.getTime() - testNowDate.getTime() >= 0){
       this.progTimeLeft = Math.ceil(
         Math.abs(testNowDate.getTime() - endDate.getTime()) / (1000 * 3600 * 24))
       this.progPercent = 100 - Math.ceil((this.progTimeLeft * 100) / this.evalInterval)
       this.setState({timeState: "eval", loading: false})
+    }
+    else{
+      this.setState({timeState: "end", loading: false})
     }
   }
 
@@ -130,6 +140,7 @@ class HomePlace extends Component {
             timeState = {this.state.timeState}
             progPercent = {this.progPercent}
             progTimeLeft = {this.progTimeLeft}
+            generalInfo = {this.generalInfo}
             handleTimeInput = {this.handleTimeInput.bind(this)}
             handleTimeIncrease = {this.handleTimeIncrease.bind(this)}
             handleTimeDecrease = {this.handleTimeDecrease.bind(this)}/> :

@@ -38,6 +38,33 @@
   padding: 7px 14px;
 }
 
+.myPanel {
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.center {
+  margin-left: auto;
+  margin-right: auto;
+  width: 8em;
+  text-align: center;
+}
+
+.progress {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+ }
+
+.progress-bar {
+ display: block;
+ font-weight: 500;
+ color: black;
+}
+
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
