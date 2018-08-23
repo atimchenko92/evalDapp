@@ -21,7 +21,8 @@ class StatsPlace extends Component {
       isOwner: false,
       courses: [],
       courseInfo: {},
-      evalInfo: []
+      evalInfo: [],
+      txtInfo: []
     }
 
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
@@ -129,14 +130,43 @@ class StatsPlace extends Component {
   }
 
   handleTextualDetailsClick(e) {
-    const cId = e.target.id
-    this.evaluation.deployed().then( async(evalInstance) => {
-      let accs = await evalInstance.getEvalAccountsByCourse(cId)
-      for(var i = 0; i < accs.length; i++){
+    var txtInfo = []
+    var chosenCourse = {}
 
+    const cId = parseInt(e.target.id, 10)
+    var self = this
+    this.evaluation.deployed().then( async(evalInstance) => {
+      var counter = 0
+      let accs = await evalInstance.getEvalAccountsByCourse(cId)
+      let courseInfo = await evalInstance.registeredCourses(cId)
+      const qMax = courseInfo[3]
+
+      const clickedCourse = self.state.courses
+        .find(course => course.cId === cId)
+
+      chosenCourse = {isNumericalEvs: false,
+        courseName: clickedCourse.cTitle}
+
+      // Load up question bodies
+      for(var i = 0; i < qMax; i++){
+        let isTextual = await evalInstance.isTextualQuestion(cId, i)
+        if(isTextual){
+          let qBody = await evalInstance.getQuestionBodyByCourse(cId, i)
+
+          //Loop through accounts
+          for(var j = 0; j < accs.length; j++){
+            let cEval = await evalInstance.readEvaluation(accs[j], cId, i)
+            var trimmedStr = String.prototype.trim.call(cEval[0].toString())
+            if(trimmedStr.length === 0) //ignore empty answers
+              continue;
+
+            counter++;
+            txtInfo.push({id: counter, qId: i+1, qBody: qBody, qAns: trimmedStr})
+          }
+        }
       }
+      self.setState({chosenCourse: chosenCourse, txtInfo: txtInfo})
     })
-    this.setState({chosenCourse: {}, evalInfo: []})
   }
 
   handleNumericalDetailsClick(e) {
@@ -256,7 +286,8 @@ class StatsPlace extends Component {
           <CourseStatPanel
             isAccessible={this.state.isOwner || this.state.isAccessible}
             chosenCourse={this.state.chosenCourse}
-            evalInfo={this.state.evalInfo}/>
+            evalInfo={this.state.evalInfo}
+            txtInfo={this.state.txtInfo}/>
         </span>:
         <span>Loading ...</span>}
       </span>

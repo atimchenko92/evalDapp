@@ -1,12 +1,67 @@
 import React, { Component } from 'react'
 
 // UI-Components
-import { Table, Panel, Alert } from 'react-bootstrap'
+import { Table, Panel, Alert, Carousel, Jumbotron } from 'react-bootstrap'
 
 class CourseStatPanel extends Component {
   render() {
     var panelTitle
     var emptyBodyElem = null
+    var contentBody = null
+
+    if(this.props.chosenCourse.isNumericalEvs){
+      contentBody = <Table striped bordered condensed hover>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Question</th>
+            <th>Mean value</th>
+          </tr>
+        </thead>
+        <tbody>
+        {this.props.evalInfo.map((ev) => {
+          return(
+            <tr key={ev.qId}>
+              <td>{ev.qId}</td>
+              <td>{ev.qBody}</td>
+              <td>
+              {new Intl.NumberFormat('en-GB', {
+                 style: 'decimal',
+                 minimumFractionDigits: 0,
+                 maximumFractionDigits: 1
+               }).format(ev.mVal)}
+              </td>
+            </tr>
+          )
+        })}
+        </tbody>
+      </Table>;
+    }
+    else{
+      if(this.props.txtInfo.length !== 0){
+        contentBody =
+          <Carousel>
+          {this.props.txtInfo.map((ev) => {
+            return(
+              <Carousel.Item key={ev.id}>
+                <Jumbotron>
+                 <h1>Question#{ev.qId}: {ev.qBody}</h1>
+                 <p>{ev.qAns}</p>
+                </Jumbotron>
+              </Carousel.Item>
+            )
+          })}
+          </Carousel>
+      }
+      else{
+        contentBody =
+        <Jumbotron>
+         <h1>No textual answers for this course</h1>
+         <p>Looks like nobody has submitted the textual response yet :( </p>
+        </Jumbotron>
+      }
+
+    }
 
     if(!this.props.isAccessible){
       emptyBodyElem = <Alert bsStyle="warning">
@@ -35,29 +90,15 @@ class CourseStatPanel extends Component {
         </Panel.Heading>
         <Panel.Body>
         {this.props.chosenCourse.courseName === undefined ?
-          <span>{emptyBodyElem}</span>
+          <span>
+            {emptyBodyElem}
+          </span>
          :
-         <Table striped bordered condensed hover>
-           <thead>
-             <tr>
-               <th>#</th>
-               <th>Question</th>
-               <th>Mean value</th>
-             </tr>
-           </thead>
-           <tbody>
-           {this.props.evalInfo.map((ev) => {
-             return(
-               <tr key={ev.qId}>
-                 <td>{ev.qId}</td>
-                 <td>{ev.qBody}</td>
-                 <td>{ev.mVal}</td>
-               </tr>
-             )
-           })}
-           </tbody>
-         </Table>
+          <span>
+            {contentBody}
+          </span>
         }
+
         </Panel.Body>
       </Panel>
     )

@@ -30,7 +30,7 @@ class Header extends Component {
                   </NavDropdown>
                 </Nav>)
               : (<Nav>
-                  <NavDropdown title="Available Courses"
+                  <NavDropdown title="My Courses"
                     id="basic-nav-dropdown">
                     {this.props.coursesAvailable.map((course) => {
                       return(
