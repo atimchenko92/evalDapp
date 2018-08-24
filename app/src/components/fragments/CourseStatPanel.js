@@ -57,7 +57,8 @@ class CourseStatPanel extends Component {
         contentBody =
         <Jumbotron>
          <h1>No textual answers for this course</h1>
-         <p>Looks like nobody has submitted the textual response yet :( </p>
+         <p>Looks like nobody has submitted a <strong>meaningful</strong>
+          textual response yet :( </p>
         </Jumbotron>
       }
 

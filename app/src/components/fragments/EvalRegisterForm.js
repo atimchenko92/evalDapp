@@ -6,7 +6,7 @@ import { FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap'
 class EvalRegisterForm extends Component {
   render() {
     return(
-      <form onSubmit={this.props.handleEvalRegisterSubmit}>
+      <form className='myForm' onSubmit={this.props.handleEvalRegisterSubmit}>
         <FormGroup controlId="formControlAccount">
           <ControlLabel>Account</ControlLabel>
           <FormControl inputRef={val => this.props.handleAccInput(val)}
