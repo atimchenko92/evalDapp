@@ -8,7 +8,7 @@ contract('Evaluation', function(accounts) {
 
   var courseId = 1;
   var answersUintTest1 = [1, 4, 4];
-  var answersUintTest2 = [1, 2];
+  var answersUintTest2 = [2,3,4,5,1];
   var ansersTxtTestEmpty = "";
 
 //Txt answers test data
@@ -23,7 +23,7 @@ contract('Evaluation', function(accounts) {
      delim, answersTxtTest1p3, delim, answersTxtTest1p4);
 //////////////////////////
 
-  var ethAmount = 5000000000000000;
+  var ethAmount = 5200000000000000;
   var smallEthAmount = 1
   let eval;
   let accNoFunds = web3.personal.newAccount('test123');
@@ -38,10 +38,12 @@ contract('Evaluation', function(accounts) {
   })
 
   it("Admin can register an account for evaluation", async () => {
-   const receipt = await eval.registerAccountForCourseEval(accounts[1], courseId, {from: owner, value: smallEthAmount});
-   console.log(`Gas for registerAccountForCourseEval:${receipt.receipt.gasUsed}`);
-   let isRegistered = await eval.checkRegistration(accounts[1], courseId, {from: owner});
-   assert.equal(isRegistered, true, "The account wasn't registered for the course evaluation");
+   const receipt = await eval.registerAccountForCourseEval(
+     accounts[1], courseId, {from: owner, value: smallEthAmount});
+   let isRegistered = await eval.checkRegistration(accounts[1],
+     courseId, {from: owner});
+   assert.equal(isRegistered, true,
+     "The account wasn't registered for the course evaluation");
   });
 
   it("Double course registration is not possible", async () => {
@@ -70,16 +72,10 @@ contract('Evaluation', function(accounts) {
   });
 
   it("Registered attendant can evaluate the course", async () => {
-    console.log(`Attendant balance before evaluation:${web3.eth.getBalance(accNoFunds)}`);
     await eval.registerAccountForCourseEval(accNoFunds, courseId, {from: owner, value: ethAmount});
     await eval.increaseNowTime(registration);
     let esGas = await eval.evaluateCourse.estimateGas(courseId, answersUintTest1, answersTxtTest1, {from: accNoFunds});
-    console.log("Estimated Gas: " + esGas);
-    console.log("Gas price: " + web3.eth.gasPrice);
-    console.log("Gas cost: " + (esGas * web3.eth.gasPrice));
-    console.log(`Attendant balance before evaluation:${web3.eth.getBalance(accNoFunds)}`);
     await eval.evaluateCourse(courseId, answersUintTest1, answersTxtTest1, {gas: esGas, from: accNoFunds});
-    console.log(`Attendant balance after evaluation:${web3.eth.getBalance(accNoFunds)}`);
     let res = await eval.isCourseEvaluatedByAccount(accNoFunds, 1);
     assert.equal(res, true, "This course should be evaluated");
   });
@@ -92,33 +88,24 @@ contract('Evaluation', function(accounts) {
    let savedAns;
    for (i = 0; i < answersUintTest1.length; i++){
      savedAns = await eval.readEvaluation(accounts[1], 1, i, {from: owner});
-     assert.equal(answersUintTest1[i], savedAns, "The results of uint evaluation are not saved correctly");
+     assert.equal(answersUintTest1[i], savedAns[0], "The results of uint evaluation are not saved correctly");
    }
    savedAns = await eval.readEvaluation(accounts[1], 1, 3, {from: owner});
-   assert.equal(savedAns, txt, "The results of txt evaluation are not saved correctly");
+   assert.equal(savedAns[0], txt, "The results of txt evaluation are not saved correctly");
   });
 
   it("Results of evaluation are saved correctly. Test#2", async () => {
-   var txt = "adas///33/44//22ASdadsad/AAdAd/A dasdASd//adas//55";
+   var txt = "adas0--//-/55";
    await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
    await eval.increaseNowTime(registration);
    await eval.evaluateCourse(3, answersUintTest2, txt, {from: accounts[1]});
    let savedAns;
    for (i = 0; i < answersUintTest2.length; i++){
      savedAns = await eval.readEvaluation(accounts[1], 3, i, {from: owner});
-     assert.equal(answersUintTest2[i], savedAns, "The results of uint evaluation are not saved correctly");
+     assert.equal(answersUintTest2[i], savedAns[0], "The results of uint evaluation are not saved correctly");
    }
-   savedAns = await eval.readEvaluation(accounts[1], 3, 2, {from: owner});
-   assert.equal(savedAns, "adas", "The results of txt evaluation are not saved correctly");
-
-   savedAns = await eval.readEvaluation(accounts[1], 3, 3, {from: owner});
-   assert.equal(savedAns, "/33/44", "The results of txt evaluation are not saved correctly");
-
-   savedAns = await eval.readEvaluation(accounts[1], 3, 4, {from: owner});
-   assert.equal(savedAns, "22ASdadsad/AAdAd/A dasdASd", "The results of txt evaluation are not saved correctly");
-
    savedAns = await eval.readEvaluation(accounts[1], 3, 5, {from: owner});
-   assert.equal(savedAns, "adas", "The results of txt evaluation are not saved correctly");
+   assert.equal(savedAns[0], "adas0--", "The results of txt evaluation are not saved correctly");
   });
 
   it("Evaluation before the evaluation period is not possible", async () => {
@@ -182,8 +169,8 @@ contract('Evaluation', function(accounts) {
     await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
     await eval.increaseNowTime(registration);
     await eval.evaluateCourse(1, answersUintTest1, answersTxtTest1, {from: accounts[1]});
-    await eval.evaluateCourse(2, answersUintTest2, ansersTxtTestEmpty, {from: accounts[1]});
-    await eval.evaluateCourse(3, [3,3], answersTxtTest2, {from: accounts[1]});
+    await eval.evaluateCourse(2, [3,5], ansersTxtTestEmpty, {from: accounts[1]});
+    await eval.evaluateCourse(3, answersUintTest2, answersTxtTest2, {from: accounts[1]});
   });
 
   it("Incorrect number of answers pro evaluation is not possible", async () => {
@@ -219,14 +206,13 @@ contract('Evaluation', function(accounts) {
   });
 
   it("UInt-Questions can be answered with max values", async () => {
-    var answersUint = [6, 5];
+    var answersUint = [6, 5, 5, 6, 6];
     await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
     await eval.increaseNowTime(registration);
     await eval.evaluateCourse(3, answersUint, answersTxtTest2, {from: accounts[1]});
     let savedAns;
     for (i = 0; i < 3; i++){
      savedAns = await eval.readEvaluation(accounts[1], 3, i, {from: owner});
-     console.log(savedAns);
     }
   });
 
@@ -267,11 +253,8 @@ contract('Evaluation', function(accounts) {
   it("getAvailableCourses test", async () => {
     var answersUint = [6, 6];
     await eval.registerAccountForCourseEval(accounts[1], 3, {from: owner, value: smallEthAmount});
-    console.log(`Balanace before:${web3.eth.getBalance(accounts[1])}`);
     let coursesArr = await eval.getAvailableCourses(accounts[1])
-    console.log(`Balanace after:${web3.eth.getBalance(accounts[1])}`);
     assert.equal(coursesArr[0], 3, "Bad results");
-    console.log(coursesArr);
   });
 
   //Do more tests...
