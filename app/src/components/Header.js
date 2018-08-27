@@ -22,12 +22,10 @@ class Header extends Component {
           ? (<span>
             {this.props.isOwner
               ? (<Nav>
-                  <NavDropdown title="Admin Tools" id="basic-nav-dropdown">
-                    <MenuItem
-                      onSelect={() => this.props.handleRegisterForEvalClick()}>
-                      Evaluation registration
-                    </MenuItem>
-                  </NavDropdown>
+                  <NavItem
+                    onSelect={() => this.props.handleRegisterForEvalClick()}>
+                    Evaluation registration
+                  </NavItem>
                 </Nav>)
               : (<Nav>
                   <NavDropdown title="My Courses"
