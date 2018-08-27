@@ -196,6 +196,9 @@ contract Evaluation {
     return QuestionsLib.getQuestionBody(registeredCourses[_cId].questionsToEvaluate[_qId]);
   }
 
+  // @param _account: account to read evaluation from
+  // @param _courseId: course id to read evaluation from
+  // @param _qId: question id to read evaluation from
   // @returns string: answer
   // @returns bool: true, if the answer is non-textual (numerical)
   function readEvaluation(address _account, uint _courseId, uint _qId)
