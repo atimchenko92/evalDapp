@@ -5,16 +5,16 @@ This is a sample implementation for Karlsruhe University Of Applied Sciences (HS
 
 ## Getting Started
 
-To function well, evalDapp relies on some actions in real world. Such actions are marked with *****.
+To function well, evalDapp relies on some actions in real world. Such actions are marked with (*).
 
 #### The  Process
   Prerequisites: each student has his HSKA-Blockchain account already. (only for convenience purposes)
 
   1. The admin migrates the evaluation contract to the blockchain. The registration for evaluation now begins.
-  2. ***** Each course lecturer gives the list preferably with N blank rows for classroom with N people.
-  3. ***** Each student writes his existing account into blank space.
-  4. ***** After it is done, the lecturer checks if number of attendants is equal to the number of accounts written.
-  5. ***** Each course lecturer gives the list of attendant accounts to the evaluation contract admin.
+  2. Each course lecturer gives the list preferably with N blank rows for classroom with N people.*
+  3. Each student writes his existing account into blank space.*
+  4. After it is done, the lecturer checks if number of attendants is equal to the number of accounts written.*
+  5. Each course lecturer gives the list of attendant accounts to the evaluation contract admin.*
   6. According to list, the admin registers students for course evaluation and gives them (internal) Ethereum to cover up gas costs.
   7. Registered students evaluate the courses.
   8. After the evaluation is expired, admin may end the evaluation process.
