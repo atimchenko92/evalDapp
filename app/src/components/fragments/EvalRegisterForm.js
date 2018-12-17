@@ -5,13 +5,13 @@ import { FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap'
 
 class EvalRegisterForm extends Component {
   render() {
-    return(
+    return (
       <form className='myForm' onSubmit={this.props.handleEvalRegisterSubmit}>
         <FormGroup controlId="formControlAccount">
           <ControlLabel>Account</ControlLabel>
           <FormControl inputRef={val => this.props.handleAccInput(val)}
             type="text"
-            placeholder="0x123..."/>
+            placeholder="0x123..." />
         </FormGroup>
         <FormGroup controlId="formControlSelect">
           <ControlLabel>Course</ControlLabel>
@@ -19,9 +19,9 @@ class EvalRegisterForm extends Component {
             componentClass="select"
             placeholder="Select course...">
             {this.props.allCourses.map((course) => {
-              return(
+              return (
                 <option key={course.id.toNumber()} value={course.id.toNumber()}>
-                {course.cName}[id={course.id.toNumber()}]
+                  {course.cName}[id={course.id.toNumber()}]
                 </option>
               )
             })}

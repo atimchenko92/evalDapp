@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { Component } from 'react'
 
 // Contract/truffle components
@@ -13,7 +14,7 @@ import { Table, Button } from 'react-bootstrap'
 
 class StatsPlace extends Component {
   constructor(args){
-    super(args);
+    super(args)
     this.state = {
       loading: true,
       isAccessible: false,
@@ -27,15 +28,15 @@ class StatsPlace extends Component {
 
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
     if (typeof web3 !== 'undefined') {
-      console.warn("Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
+      console.warn('Using web3 detected from external source. If you find that your accounts don\'t appear or you have 0 MetaCoin, ensure you\'ve configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask')
       // Use Mist/MetaMask's provider
-      this.provider = window.web3.currentProvider;
+      this.provider = window.web3.currentProvider
     } else {
-      console.warn("No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
+      console.warn('No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live, as it\'s inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask')
       // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-      this.provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545");
+      this.provider = new Web3.providers.HttpProvider('http://127.0.0.1:8545')
     }
-    window.web3 = new Web3(this.provider);
+    window.web3 = new Web3(this.provider)
 
     this.evaluation = contract(evaluation_artifacts)
     this.evaluation.setProvider(this.provider)
@@ -47,20 +48,20 @@ class StatsPlace extends Component {
   }
 
   componentDidMount(){
-    var self = this;
+    var self = this
     window.web3.eth.getCoinbase(function(err, account) {
       if (err != null) {
-        alert("There was an error fetching your account.");
-        console.log(err);
-        return;
+        alert('There was an error fetching your account.')
+        console.log(err)
+        return
       }
 
       if (account == null) {
-        alert("Couldn't load account! Make sure your Ethereum client is configured correctly.");
-        return;
+        alert('Couldn\'t load account! Make sure your Ethereum client is configured correctly.')
+        return
       }
 
-      self.setState({account: account});
+      self.setState({account: account})
       self.evaluation.deployed().then( async(evalInstance) => {
 
         let contractOwner = await evalInstance.owner()
@@ -71,7 +72,7 @@ class StatsPlace extends Component {
 
         self.loadBasicStatInfo(evalInstance)
       })
-    });
+    })
   }
 
   async loadBasicStatInfo(evalInstance){
@@ -126,7 +127,7 @@ class StatsPlace extends Component {
     }
 
     this.setState({ courses: statCourses, chosenCourse: {},
-                    isAccessible: isAccessible, loading : false})
+      isAccessible: isAccessible, loading : false})
   }
 
   handleTextualDetailsClick(e) {
@@ -158,9 +159,9 @@ class StatsPlace extends Component {
             let cEval = await evalInstance.readEvaluation(accs[j], cId, i)
             var trimmedStr = String.prototype.trim.call(cEval[0].toString())
             if(trimmedStr.length === 0) //ignore empty answers
-              continue;
+              continue
 
-            counter++;
+            counter++
             txtInfo.push({id: counter, qId: i+1, qBody: qBody, qAns: trimmedStr})
           }
         }
@@ -199,7 +200,7 @@ class StatsPlace extends Component {
           for(var j = 0; j < accs.length; j++){
             let cEval = await evalInstance.readEvaluation(accs[j], cId, i)
             if(parseInt(cEval[0], 10) === 6)
-              ignoredAccs++;
+              ignoredAccs++
             else
               tmpVal += parseInt(cEval[0], 10)
           }
@@ -226,70 +227,70 @@ class StatsPlace extends Component {
     return(
       <span>
         {!this.state.loading ?
-         <span>
-          <Table striped bordered condensed hover>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Course</th>
-                <th>Lecturer</th>
-                <th>Number of registrations</th>
-                <th>Number of evaluations</th>
-                <th>Evaluation ratio</th>
-                {evStatus}
-                <th>Numerical evaluations</th>
-                <th>Textual response</th>
-              </tr>
-            </thead>
-            <tbody>
-            {this.state.courses.map((course) => {
-              return(
-                <tr key={course.cId}>
-                  <td>{course.cId}</td>
-                  <td>{course.cTitle}</td>
-                  <td>{course.cLec}</td>
-                  <td>{course.cReg}</td>
-                  <td>{course.cEval}</td>
-                  <td>
-                  {new Intl.NumberFormat('en-GB', {
-                     style: 'percent',
-                     minimumFractionDigits: 0,
-                     maximumFractionDigits: 1
-                   }).format(course.cRatio)}
-                  </td>
-                  {!this.state.isOwner ?
-                    <td>{course.isEvaluated ? 'evaluated' : 'not evaluated'}
-                    </td> :
-                    null
-                  }
-                  <td>
-                    <Button bsStyle="primary"
-                      id={course.cId}
-                      disabled={!course.hasNumerical || !this.state.isAccessible}
-                      onClick={this.handleNumericalDetailsClick}>
-                      Show details
-                    </Button>
-                  </td>
-                  <td>
-                    <Button bsStyle="info"
-                      id={course.cId}
-                      disabled={!course.hasTextual || !this.state.isAccessible}
-                      onClick={this.handleTextualDetailsClick}>
-                      Show details
-                    </Button>
-                  </td>
+          <span>
+            <Table striped bordered condensed hover>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Course</th>
+                  <th>Lecturer</th>
+                  <th>Number of registrations</th>
+                  <th>Number of evaluations</th>
+                  <th>Evaluation ratio</th>
+                  {evStatus}
+                  <th>Numerical evaluations</th>
+                  <th>Textual response</th>
                 </tr>
-              )
-            })}
-            </tbody>
-          </Table>
-          <CourseStatPanel
-            isAccessible={this.state.isOwner || this.state.isAccessible}
-            chosenCourse={this.state.chosenCourse}
-            evalInfo={this.state.evalInfo}
-            txtInfo={this.state.txtInfo}/>
-        </span>:
-        <span>Loading ...</span>}
+              </thead>
+              <tbody>
+                {this.state.courses.map((course) => {
+                  return(
+                    <tr key={course.cId}>
+                      <td>{course.cId}</td>
+                      <td>{course.cTitle}</td>
+                      <td>{course.cLec}</td>
+                      <td>{course.cReg}</td>
+                      <td>{course.cEval}</td>
+                      <td>
+                        {new Intl.NumberFormat('en-GB', {
+                          style: 'percent',
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 1
+                        }).format(course.cRatio)}
+                      </td>
+                      {!this.state.isOwner ?
+                        <td>{course.isEvaluated ? 'evaluated' : 'not evaluated'}
+                        </td> :
+                        null
+                      }
+                      <td>
+                        <Button bsStyle="primary"
+                          id={course.cId}
+                          disabled={!course.hasNumerical || !this.state.isAccessible}
+                          onClick={this.handleNumericalDetailsClick}>
+                      Show details
+                        </Button>
+                      </td>
+                      <td>
+                        <Button bsStyle="info"
+                          id={course.cId}
+                          disabled={!course.hasTextual || !this.state.isAccessible}
+                          onClick={this.handleTextualDetailsClick}>
+                      Show details
+                        </Button>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </Table>
+            <CourseStatPanel
+              isAccessible={this.state.isOwner || this.state.isAccessible}
+              chosenCourse={this.state.chosenCourse}
+              evalInfo={this.state.evalInfo}
+              txtInfo={this.state.txtInfo}/>
+          </span>:
+          <span>Loading ...</span>}
       </span>
     )
   }

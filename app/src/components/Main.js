@@ -20,7 +20,7 @@ class Main extends Component {
           <Route path='/stats' component={StatsPlace}/> 
         </Switch>
       </main>
-    );
+    )
   }
 }
 

@@ -2,11 +2,11 @@ import React, { Component } from 'react'
 
 // UI-Components
 import { Panel } from 'react-bootstrap'
-import procPic from '../../static/images/process.png';
+import procPic from '../../static/images/process.png'
 
 class AboutPlace extends Component {
   render() {
-    return(
+    return (
       <span>
         <Panel>
           <Panel.Heading>
@@ -16,15 +16,15 @@ class AboutPlace extends Component {
           </Panel.Heading>
           <Panel.Body>
             <img src={procPic} alt="Evaluation process"
-              className='picStyle'/>
+              className='picStyle' />
           </Panel.Body>
           <Panel.Footer>
-             More info on
-              <a href="https://github.com/atimchenko92/evalDapp"> GitHub Repository</a>
+            More info on
+            <a href="https://github.com/atimchenko92/evalDapp"> GitHub Repository</a>
           </Panel.Footer>
         </Panel>;
       </span>
-    );
+    )
   }
 }
 

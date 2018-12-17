@@ -3,38 +3,38 @@ import history from '../history'
 
 // UI-Components
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
-import logo from '../static/images/HSKAlogo.png';
+import logo from '../static/images/HSKAlogo.png'
 
 class Header extends Component {
   render() {
-    return(
+    return (
       <Navbar inverse collapseOnSelect>
         <Navbar.Header>
           <Navbar.Brand bsSize="large">
-            <a className="clickableStyle" onClick={()=>{history.push('/')}}>evalDapp
+            <a className="clickableStyle" onClick={() => { history.push('/') }}>evalDapp
               <img src={logo} className="App-logo" alt="logo" />
             </a>
           </Navbar.Brand>
           <Navbar.Toggle />
         </Navbar.Header>
         <Navbar.Collapse>
-        {!this.props.loading
-          ? (<span>
-            {this.props.isOwner
-              ? (<Nav>
+          {!this.props.loading
+            ? (<span>
+              {this.props.isOwner
+                ? (<Nav>
                   <NavItem
                     onSelect={() => this.props.handleRegisterForEvalClick()}>
                     Evaluation registration
                   </NavItem>
                 </Nav>)
-              : (<Nav>
+                : (<Nav>
                   <NavDropdown title="My Courses"
                     id="basic-nav-dropdown">
                     {this.props.coursesAvailable.map((course) => {
-                      return(
+                      return (
                         <MenuItem
                           key={course.id.toNumber()}
-                          onSelect={ k => this.props.handleCourseClick(k)}
+                          onSelect={k => this.props.handleCourseClick(k)}
                           eventKey={course.id.toNumber()}>
                           {course.cName}
                           [id={course.id.toNumber()}]
@@ -46,12 +46,12 @@ class Header extends Component {
                       <MenuItem className='disabled'>
                         No courses yet...
                       </MenuItem> :
-                      <span/>}
+                      <span />}
                   </NavDropdown>
                 </Nav>)
-            }
+              }
             </span>)
-          : (<div>Loading...</div>)
+            : (<div>Loading...</div>)
           }
           <Navbar.Text>
             <span className="App-title">Signed in as
@@ -59,10 +59,10 @@ class Header extends Component {
             </span>
           </Navbar.Text>
           <Nav pullRight>
-            <NavItem onSelect={()=>{history.push('/stats/')}}>
+            <NavItem onSelect={() => { history.push('/stats/') }}>
               Show stats
             </NavItem>
-            <NavItem onSelect={()=>{history.push('/about/')}}>
+            <NavItem onSelect={() => { history.push('/about/') }}>
               About
             </NavItem>
           </Nav>

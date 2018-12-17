@@ -1,8 +1,9 @@
+/* eslint-disable no-console */
 import React, { Component } from 'react'
 import history from '../../history'
 
 // Contract/truffle components
-import { default as Web3} from 'web3'
+import { default as Web3 } from 'web3'
 import { default as contract } from 'truffle-contract'
 import evaluation_artifacts from '../../contracts/Evaluation.json'
 
@@ -14,8 +15,8 @@ import CourseEvalResult from '../fragments/CourseEvalResult'
 import { Button } from 'react-bootstrap'
 
 class CourseEvalPlace extends Component {
-  constructor(args){
-    super(args);
+  constructor(args) {
+    super(args)
     this.state = {
       isAvailable: false,
       isEvaluated: true,
@@ -29,75 +30,77 @@ class CourseEvalPlace extends Component {
 
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
     if (typeof web3 !== 'undefined') {
-      console.warn("Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
+      console.warn('Using web3 detected from external source. If you find that your accounts don\'t appear or you have 0 MetaCoin, ensure you\'ve configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask')
       // Use Mist/MetaMask's provider
-      this.provider = window.web3.currentProvider;
+      this.provider = window.web3.currentProvider
     } else {
-      console.warn("No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
+      console.warn('No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live, as it\'s inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask')
       // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-      this.provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545");
+      this.provider = new Web3.providers.HttpProvider('http://127.0.0.1:8545')
     }
-    window.web3 = new Web3(this.provider);
+    window.web3 = new Web3(this.provider)
 
     this.evaluation = contract(evaluation_artifacts)
     this.evaluation.setProvider(this.provider)
 
-    this.handlePagerClick = this.handlePagerClick.bind(this);
-    this.handleAnswerClick = this.handleAnswerClick.bind(this);
-    this.handleAnswerTextual = this.handleAnswerTextual.bind(this);
-    this.handleValidationState = this.handleValidationState.bind(this);
-    this.handleCourseEvaluation = this.handleCourseEvaluation.bind(this);
-    this.setState({currentCourse: args.match.params.number});
+    this.handlePagerClick = this.handlePagerClick.bind(this)
+    this.handleAnswerClick = this.handleAnswerClick.bind(this)
+    this.handleAnswerTextual = this.handleAnswerTextual.bind(this)
+    this.handleValidationState = this.handleValidationState.bind(this)
+    this.handleCourseEvaluation = this.handleCourseEvaluation.bind(this)
+    this.setState({ currentCourse: args.match.params.number })
   }
 
   static getMaxTextLength() {
-    return 128;
+    return 128
   }
 
-  componentDidMount(){
-    console.log("in course eval place")
-    var self = this;
-    window.web3.eth.getCoinbase(function(err, account) {
+  componentDidMount() {
+    console.log('in course eval place')
+    var self = this
+    window.web3.eth.getCoinbase(function (err, account) {
       if (err != null) {
-        alert("There was an error fetching your account.");
-        console.log(err);
-        return;
+        alert('There was an error fetching your account.')
+        console.log(err)
+        return
       }
 
       if (account == null) {
-        alert("Couldn't load account! Make sure your Ethereum client is configured correctly.");
-        return;
+        alert('Couldn\'t load account! Make sure your Ethereum client is configured correctly.')
+        return
       }
 
-      self.setState({account: account});
-      self.loadBasicCourseInfo(self.state.currentCourse);
-    });
+      self.setState({ account: account })
+      self.loadBasicCourseInfo(self.state.currentCourse)
+    })
   }
 
-  async loadBasicCourseInfo (courseToBeLoaded){
-    this.setState({ currentCourse: courseToBeLoaded})
+  async loadBasicCourseInfo(courseToBeLoaded) {
+    this.setState({ currentCourse: courseToBeLoaded })
     this.evaluation.deployed().then((evalInstance) => {
       this.evalInstance = evalInstance
       this.loadCourseQuestions(evalInstance, courseToBeLoaded)
     })
   }
 
-  async loadCourseQuestions(evalInstance, courseToBeLoaded){
+  async loadCourseQuestions(evalInstance, courseToBeLoaded) {
     var curQuestion = {}
     var courseQuestions = []
 
     let isAvailable = await evalInstance
       .checkRegistration(this.state.account, courseToBeLoaded)
 
-    if(isAvailable === false){
-      this.setState({ courseQuestions: [],
-        curQuestion: {}, loading : false})
+    if (isAvailable === false) {
+      this.setState({
+        courseQuestions: [],
+        curQuestion: {}, loading: false
+      })
     } else {
 
       let evalInfo = await evalInstance
         .studentEvaluations(this.state.account, courseToBeLoaded)
 
-      if(evalInfo[1] === true){
+      if (evalInfo[1] === true) {
         this.prepareEvaluationResult(evalInstance, courseToBeLoaded)
         return
       }
@@ -109,63 +112,66 @@ class CourseEvalPlace extends Component {
       for (var i = 0; i < qMax; i++) {
         let qBody = await evalInstance
           .getQuestionBodyByCourse(courseToBeLoaded, i)
-        curQuestion = {qId: i+1, qText: qBody,
-         isTextual: false, isFirst: (i === 0) ? true : false,
-         isLast: (i === (qMax.toNumber() - 1)) ? true : false,
-         answers: [], chosenAnswer: "", isValidAnswer: false
-       }
+        curQuestion = {
+          qId: i + 1, qText: qBody,
+          isTextual: false, isFirst: (i === 0) ? true : false,
+          isLast: (i === (qMax.toNumber() - 1)) ? true : false,
+          answers: [], chosenAnswer: '', isValidAnswer: false
+        }
 
         let maxAnswers = await evalInstance
           .getMaxAnswerForQuestionWrapper(courseToBeLoaded, i)
 
-        if(maxAnswers.toNumber() === 0){
+        if (maxAnswers.toNumber() === 0) {
           curQuestion.isTextual = true
           curQuestion.isValidAnswer = true
         }
 
         //Load answers:
-        for (var j = 1; j <= maxAnswers; j++){
+        for (var j = 1; j <= maxAnswers; j++) {
           let ansText = await evalInstance
             .getRatingTextForValWrapper(courseToBeLoaded, i, j)
-          curQuestion.answers.push({id: j, text: ansText})
+          curQuestion.answers.push({ id: j, text: ansText })
         }
         courseQuestions.push(curQuestion)
       }
-      this.setState({ courseQuestions: courseQuestions,
-        curQuestion: courseQuestions[0], loading : false,
-        isEvaluated : false,
-        isAvailable : true})
+      this.setState({
+        courseQuestions: courseQuestions,
+        curQuestion: courseQuestions[0], loading: false,
+        isEvaluated: false,
+        isAvailable: true
+      })
     }
   }
 
-  isCourseReadyForEvaluation(){
+  isCourseReadyForEvaluation() {
     const cQuest = this.state.courseQuestions
       .find(question => question.isValidAnswer === false)
 
-    if(typeof cQuest === "undefined")
+    if (typeof cQuest === 'undefined')
       return true
     else
       return false
   }
 
-  handlePagerClick (k){
-    if(k==="next"){
+  handlePagerClick(k) {
+    if (k === 'next') {
       const resNext = this.state.courseQuestions.find(course => course.qId === (this.state.curQuestion.qId + 1))
       this.setState({ curQuestion: resNext })
-      history.push('/course/'+this.state.currentCourse+'?qId='+ resNext.qId);
+      history.push('/course/' + this.state.currentCourse + '?qId=' + resNext.qId)
     }
-    else if (k==="prev") {
+    else if (k === 'prev') {
       const resPrev = this.state.courseQuestions.find(course => course.qId === (this.state.curQuestion.qId - 1))
       this.setState({ curQuestion: resPrev })
-      history.push('/course/'+this.state.currentCourse+'?qId='+ resPrev.qId);
+      history.push('/course/' + this.state.currentCourse + '?qId=' + resPrev.qId)
     }
     else return
   }
 
-  handleAnswerTextual (e){
+  handleAnswerTextual(e) {
     const qCopy = this.state.curQuestion
     qCopy.chosenAnswer = e.target.value
-    this.setState({curQuestion: qCopy})
+    this.setState({ curQuestion: qCopy })
   }
 
   handleAnswerClick(k) {
@@ -176,17 +182,17 @@ class CourseEvalPlace extends Component {
   }
 
   handleValidationState() {
-    const length = this.state.curQuestion.chosenAnswer.length;
+    const length = this.state.curQuestion.chosenAnswer.length
     const qCopy = this.state.curQuestion
-    if (length <= CourseEvalPlace.getMaxTextLength()){
-      qCopy.isValidAnswer = true;
-      return 'success';
+    if (length <= CourseEvalPlace.getMaxTextLength()) {
+      qCopy.isValidAnswer = true
+      return 'success'
     }
     else if (length > CourseEvalPlace.getMaxTextLength()) {
-      qCopy.isValidAnswer = false;
-      return 'error';
+      qCopy.isValidAnswer = false
+      return 'error'
     }
-    return null;
+    return null
   }
 
   async prepareEvaluationResult(evalInstance, courseToBeLoaded) {
@@ -203,32 +209,36 @@ class CourseEvalPlace extends Component {
       let savedAns = await evalInstance
         .readEvaluation(this.state.account, courseToBeLoaded, i)
 
-      if(savedAns[1]){
+      if (savedAns[1]) {
         txtAns = await evalInstance
           .getRatingTextForValWrapper(courseToBeLoaded, i, savedAns[0])
       }
       else {
-        txtAns = ""
+        txtAns = ''
       }
 
-      evalInfo.push({qId: i+1, qBody: qBody,
-        qAnswer: savedAns[0], qTxtAnswer: txtAns})
+      evalInfo.push({
+        qId: i + 1, qBody: qBody,
+        qAnswer: savedAns[0], qTxtAnswer: txtAns
+      })
     }
 
-    this.setState({ courseQuestions: [],
-      evalInfo : evalInfo, curQuestion: {},
-      loading : false, isAvailable : true})
+    this.setState({
+      courseQuestions: [],
+      evalInfo: evalInfo, curQuestion: {},
+      loading: false, isAvailable: true
+    })
   }
 
   handleCourseEvaluation() {
     var uintAnswers = []
-    var txtAnswers = ""
+    var txtAnswers = ''
 
-    for(var i = 0; i < this.state.courseQuestions.length; i++){
-      if (this.state.courseQuestions[i].isTextual){
-        txtAnswers = txtAnswers + "//" + this.state.courseQuestions[i].chosenAnswer
+    for (var i = 0; i < this.state.courseQuestions.length; i++) {
+      if (this.state.courseQuestions[i].isTextual) {
+        txtAnswers = txtAnswers + '//' + this.state.courseQuestions[i].chosenAnswer
       }
-      else{
+      else {
         uintAnswers.push(this.state.courseQuestions[i].chosenAnswer)
       }
     }
@@ -239,50 +249,50 @@ class CourseEvalPlace extends Component {
     })
   }
 
-  async handleEvaluation(evalInstance, uintAnswers, txtAnswers){
+  async handleEvaluation(evalInstance, uintAnswers, txtAnswers) {
     await evalInstance.evaluateCourse(this.state.currentCourse, uintAnswers,
-      txtAnswers, {from: this.state.account})
+      txtAnswers, { from: this.state.account })
   }
 
   render() {
     const isRdyForEval = this.isCourseReadyForEvaluation()
     const msgNotAvailable = 'Sorry, you are not yet registered for this course'
 
-    if(this.props.match.params.number !== this.state.currentCourse)
+    if (this.props.match.params.number !== this.state.currentCourse)
       this.loadBasicCourseInfo(this.props.match.params.number)
 
-    return(
+    return (
       <span>
         {!this.state.loading ?
           <span>
-          {this.state.isAvailable ?
-            <span>
-            {this.state.isEvaluated ?
-              <CourseEvalResult evalInfo = {this.state.evalInfo}/> :
+            {this.state.isAvailable ?
               <span>
-                <QuestionContainer
-                  qInfo={this.state.curQuestion}
-                  currentCourse={this.state.currentCourse}
-                  handleValidationState={this.handleValidationState.bind(this)}
-                  handleAnswerClick={this.handleAnswerClick.bind(this)}
-                  handleAnswerTextual={this.handleAnswerTextual.bind(this)}
-                  handlePagerClick={this.handlePagerClick.bind(this)}/>
-                <Button bsStyle="success"
-                  onClick={this.handleCourseEvaluation}
-                  disabled={!isRdyForEval}>
-                  Evaluate the course
-                </Button>
+                {this.state.isEvaluated ?
+                  <CourseEvalResult evalInfo={this.state.evalInfo} /> :
+                  <span>
+                    <QuestionContainer
+                      qInfo={this.state.curQuestion}
+                      currentCourse={this.state.currentCourse}
+                      handleValidationState={this.handleValidationState.bind(this)}
+                      handleAnswerClick={this.handleAnswerClick.bind(this)}
+                      handleAnswerTextual={this.handleAnswerTextual.bind(this)}
+                      handlePagerClick={this.handlePagerClick.bind(this)} />
+                    <Button bsStyle="success"
+                      onClick={this.handleCourseEvaluation}
+                      disabled={!isRdyForEval}>
+                      Evaluate the course
+                    </Button>
+                  </span>
+                }
               </span>
+              :
+              <span>{msgNotAvailable}</span>
             }
-            </span>
-            :
-            <span>{msgNotAvailable}</span>
-          }
-          </span>:
+          </span> :
           <span>Loading...</span>
         }
-       </span>
-    );
+      </span>
+    )
   }
 }
 
